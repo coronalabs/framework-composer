@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------------------
 --
--- storyboard.lua
+-- composer.lua
 --
 -----------------------------------------------------------------------------------------
 
@@ -40,14 +40,14 @@ lib.loadedSceneModules = {}
 -- a table containing the loaded scenes. references to package.loaded removed below
 lib.loadedScenes = {}
 
--- the internal table used for storing variables across storyboard scenes
+-- the internal table used for storing variables across composer scenes
 lib.variables = {}
 
-lib.stage = stage 	-- allows external access to storyboard's display group
+lib.stage = stage 	-- allows external access to composer's display group
 lib.recycleAutomatically = true -- if false, no scenes will auto-purge on low memory
 lib.recycleOnSceneChange = false -- if true, will automatically purge non-active scenes on scene change
 lib.isDebug = false	-- if true, will print useful info to the terminal in some situations
-lib.debugPrefix = "STORYBOARD: "
+lib.debugPrefix = "COMPOSER: "
 
 -- localized variables
 local _tonumber = tonumber
@@ -679,13 +679,13 @@ end
 -- removes the scene (display group) from memory
 
 lib.purgeScene = function( sceneName )
-	print( "WARNING: storyboard.purgeScene() is deprecated. This now calls through to storyboard.removeScene( true ) instead." )
+	print( "WARNING: composer.purgeScene() is deprecated. This now calls through to composer.removeScene( true ) instead." )
 	lib.removeScene( sceneName, true )
 end
 
 lib.removeScene = function( sceneName, shouldRecycle )
 	-- Unload a scene and remove its display group
-	-- NOTE: global reference in storyboard.scenes is kept, unless shouldRecycle is set to false
+	-- NOTE: global reference in composer.scenes is kept, unless shouldRecycle is set to false
 	local toRecycle = shouldRecycle or true
 	
 	local scene = lib.loadedScenes[sceneName]
@@ -704,7 +704,7 @@ lib.removeScene = function( sceneName, shouldRecycle )
 		end
 	elseif lib.isDebug then
 		if not scene then
-			debug_print( sceneName .. " was not purged because it does not exist. Use storyboard.loadScene() or storyboard.gotoScene()." )
+			debug_print( sceneName .. " was not purged because it does not exist. Use composer.loadScene() or composer.gotoScene()." )
 		elseif scene and not scene.view then
 			debug_print( sceneName .. " was not purged because it's view (display group) does not exist. This means it has already been purged or the view was never created." )
 		end
@@ -726,12 +726,12 @@ end
 -- purges all the loaded scenes
 
 lib.purgeAll = function()
-	print("WARNING: storyboard.purgeAll() is deprecated. This now calls through to storyboard.removeHidden( true ) instead." )
+	print("WARNING: composer.purgeAll() is deprecated. This now calls through to composer.removeHidden( true ) instead." )
 	lib.removeHidden( true )
 end
 
 lib.removeAll = function()
-	print( "WARNING: storyboard.removeAll() is deprecated. This now calls through to storyboard.removeHidden( false ) instead." )
+	print( "WARNING: composer.removeAll() is deprecated. This now calls through to composer.removeHidden( false ) instead." )
 	lib.removeHidden( false )
 end
 
@@ -772,7 +772,7 @@ lib.removeHidden = function( shouldRecycle )
 end
 
 lib.getPrevious = function()
-	print("WARNING: storyboard.getPrevious() is deprecated. This now calls through to storyboard.getSceneName( \"previous\" ) instead.")
+	print("WARNING: composer.getPrevious() is deprecated. This now calls through to composer.getSceneName( \"previous\" ) instead.")
 	return lib.getSceneName( "previous" )
 end
 
@@ -824,7 +824,7 @@ end
 -- returns the current scene name as string
 
 lib.getCurrentSceneName = function()
-	print("WARNING: storyboard.getCurrentSceneName() is deprecated. This now calls through to storyboard.getSceneName( \"current\" ) instead.")
+	print("WARNING: composer.getCurrentSceneName() is deprecated. This now calls through to composer.getSceneName( \"current\" ) instead.")
 	return lib.getSceneName( "current" )
 end
 
@@ -912,7 +912,7 @@ end
 
 -----------------------------------------------------------------------------------------
 
--- storyboard.hideOverlay()
+-- composer.hideOverlay()
 -- public
 -- hides the overlay scene
 
@@ -930,7 +930,7 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 			effectTime = argOffset
 
 			if lib.isDebug then
-				debug_print( "WARNING: You should use dot-syntax when calling storyboard functions. For example, storyboard.hideOverlay() instead of storyboard:hideOverlay()." )
+				debug_print( "WARNING: You should use dot-syntax when calling composer functions. For example, composer.hideOverlay() instead of composer:hideOverlay()." )
 			end
 		end
 
@@ -1016,7 +1016,7 @@ end
 
 -----------------------------------------------------------------------------------------
 
--- storyboard.showOverlay()
+-- composer.showOverlay()
 -- public
 -- creates the overlay scene
 
@@ -1167,17 +1167,17 @@ end
 
 --
 --
--- storyboard.loadScene()
--- Same as storyboard.gotoScene(), but no transition is initiated.
+-- composer.loadScene()
+-- Same as composer.gotoScene(), but no transition is initiated.
 --
 --
 
 function lib.loadScene( sceneName, doNotLoadView, params )
-	-- SYNTAX: storyboard.loadScene( sceneName [, doNotLoadView, params ] )	-- params is optional table w/ custom data
+	-- SYNTAX: composer.loadScene( sceneName [, doNotLoadView, params ] )	-- params is optional table w/ custom data
 
 	-- check for dot syntax (to prevent errors)
 	if sceneName == lib then
-		error( "You must use a dot (instead of a colon) when calling storyboard.loadScene()" )
+		error( "You must use a dot (instead of a colon) when calling composer.loadScene()" )
 	end
 
 	-- check to see if scene has already been loaded
@@ -1226,7 +1226,7 @@ end
 -----------------------------------------------------------------------------------------
 
 function lib.gotoScene( ... )
-	-- OLD SYNTAX: storyboard.gotoScene( sceneName [, effect, effectTime] )
+	-- OLD SYNTAX: composer.gotoScene( sceneName [, effect, effectTime] )
 	--
 	-- NEW SYNTAX:
 	--
@@ -1235,7 +1235,7 @@ function lib.gotoScene( ... )
 	--     time = 800,
 	--     params = { any="vars", can="go", here=true }	-- optional params table to pass to scene event
 	-- }
-	-- storyboard.gotoScene( sceneName, options )
+	-- composer.gotoScene( sceneName, options )
 	--
 	-- NOTE: params table will only be visible in the following events: "createScene", "willEnterScene" and "enterScene"
     --
@@ -1246,12 +1246,12 @@ function lib.gotoScene( ... )
 	local arg = {...}
 	local argOffset = 0
 
-	-- if user uses colon syntax (storyboard:gotoScene()), autocorrect to prevent errors
+	-- if user uses colon syntax (composer:gotoScene()), autocorrect to prevent errors
 	if arg[1] and arg[1] == lib then
 		argOffset = 1
 
 		if lib.isDebug then
-			debug_print( "WARNING: You should use dot-syntax when calling storyboard functions. For example, storyboard.gotoScene() instead of storyboard:gotoScene()." )
+			debug_print( "WARNING: You should use dot-syntax when calling composer functions. For example, composer.gotoScene() instead of composer:gotoScene()." )
 		end
 	end
 	
@@ -1368,7 +1368,7 @@ function lib.gotoScene( ... )
 		local success, msg = pcall( function() lib.loadedScenes[newScene] = require( newScene ) end )
 		if not success and msg then
 			if lib.isDebug then
-				debug_print( "Cannot transition to scene: " .. _toString(newScene) .. ". There is either an error in the scene module, or you are attempting to go to a scene that does not exist. If you called storyboard.removeScene() on a scene that is NOT represented by a module, the scene must be re-created before transitioning back to it." )
+				debug_print( "Cannot transition to scene: " .. _toString(newScene) .. ". There is either an error in the scene module, or you are attempting to go to a scene that does not exist. If you called composer.removeScene() on a scene that is NOT represented by a module, the scene must be re-created before transitioning back to it." )
 			end
 			error( msg )
 		end
@@ -1389,7 +1389,7 @@ function lib.gotoScene( ... )
 	if fx.sceneAbove then
 		stage:insert( lib._currentScene )
 	else
-		stage:insert( 1, lib._currentScene )	-- ensure new scene is in storyboard's 'stage' display group
+		stage:insert( 1, lib._currentScene )	-- ensure new scene is in composer's 'stage' display group
 	end
 	lib._touchOverlay:toFront()	-- make sure touch overlay is in front of newly loaded scene
 
@@ -1494,7 +1494,7 @@ local function purgeLruScene( event )	-- Lru = "least recently used"
 		-- currently transitioning-out scene from being purged)
 		if lruScene and lruScene ~= lib._currentModule and #lib.loadedSceneModules > 2 then
 			if lib.isDebug then
-				debug_print( "Auto-purging scene: " .. lruScene " due to low memory. If you want to disable auto-purging on low memory, set storyboard.recycleAutomatically to false." )
+				debug_print( "Auto-purging scene: " .. lruScene " due to low memory. If you want to disable auto-purging on low memory, set composer.recycleAutomatically to false." )
 			end
 			lib.removeScene( lruScene, true )
 		end
@@ -1506,7 +1506,7 @@ end
 Runtime:addEventListener( "memoryWarning", purgeLruScene )
 
 lib.printMemUsage = function()
-	print("WARNING: storyboard.printMemUsage() has been removed.")
+	print("WARNING: composer.printMemUsage() has been removed.")
 end
 
 lib.setVariable = function( key, value )
