@@ -701,7 +701,6 @@ lib.removeScene = function( sceneName, shouldRecycle )
 		if scene.view then
 			display.remove( scene.view )
 			scene.view = nil
-			--_collectGarbage( "collect" )
 		end
 	elseif lib.isDebug then
 		if not scene then
@@ -872,7 +871,7 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 			event.params = customParams
 			lib.loadedScenes[lib._currentModule]:dispatchEvent( event )
 
-			if not lib.recycleOnSceneChange then
+			if lib.recycleOnSceneChange then
 				lib.removeHidden()
 			end
 		end
@@ -1479,7 +1478,7 @@ function lib.gotoScene( ... )
 			lib.loadedScenes[lib._currentModule]:dispatchEvent( event )
 			
 
-			if not lib.recycleOnSceneChange then
+			if lib.recycleOnSceneChange then
 				lib.removeHidden()
 			end
 		end
