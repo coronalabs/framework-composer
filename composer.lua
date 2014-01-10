@@ -678,6 +678,7 @@ end
 -- public
 -- removes the scene (display group) from memory
 
+-- TODO: This is deprecated.
 lib.purgeScene = function( sceneName )
 	print( "WARNING: composer.purgeScene() is deprecated. This now calls through to composer.removeScene( true ) instead." )
 	lib.removeScene( sceneName, true )
@@ -725,11 +726,13 @@ end
 -- public
 -- purges all the loaded scenes
 
+-- TODO: This is deprecated.
 lib.purgeAll = function()
 	print("WARNING: composer.purgeAll() is deprecated. This now calls through to composer.removeHidden( true ) instead." )
 	lib.removeHidden( true )
 end
 
+-- TODO: This is deprecated.
 lib.removeAll = function()
 	print( "WARNING: composer.removeAll() is deprecated. This now calls through to composer.removeHidden( false ) instead." )
 	lib.removeHidden( false )
@@ -771,6 +774,7 @@ lib.removeHidden = function( shouldRecycle )
 	
 end
 
+-- TODO: This is deprecated.
 lib.getPrevious = function()
 	print("WARNING: composer.getPrevious() is deprecated. This now calls through to composer.getSceneName( \"previous\" ) instead.")
 	return lib.getSceneName( "previous" )
@@ -1505,6 +1509,7 @@ end
 
 Runtime:addEventListener( "memoryWarning", purgeLruScene )
 
+-- TODO: This is deprecated.
 lib.printMemUsage = function()
 	print("WARNING: composer.printMemUsage() has been removed.")
 end
