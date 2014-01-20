@@ -44,7 +44,7 @@ lib.loadedScenes = {}
 lib.variables = {}
 
 lib.stage = stage 	-- allows external access to composer's display group
-lib.recycleAutomatically = true -- if false, no scenes will auto-purge on low memory
+lib.recycleOnLowMemory = true -- if false, no scenes will auto-purge on low memory
 lib.recycleOnSceneChange = false -- if true, will automatically purge non-active scenes on scene change
 lib.isDebug = false	-- if true, will print useful info to the terminal in some situations
 lib.debugPrefix = "COMPOSER: "
@@ -952,6 +952,13 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 			event.name = "hide"
 			event.phase = "did"
 			event.sceneName = overlay.name
+			
+			-- if the overlay has a parent scene, add event.parent to the dispatched event
+			if lib._currentModule then
+				local currentScene = lib.loadedScenes[ lib._currentModule ]
+				event.parent = currentScene
+			end
+			
 			overlay:dispatchEvent( event )
 
 			-- check to see if overlay scene is also being used as a normal scene (in which case we won't remove; only purge)
@@ -965,14 +972,15 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 			end
 
 			-- on current scene (not overlay), dispatch "hide" event with did phase
-			if lib._currentModule then
+			--[[if lib._currentModule then
 				local current = lib.loadedScenes[lib._currentModule]
 				local event = {}
 				event.name = "hide"
 				event.phase = "did"
 				event.sceneName = overlay.name
 				current:dispatchEvent( event )
-			end
+			end]]--
+			
 			overlay = nil
 			lib._touchOverlay.isHitTestable = false -- ensure touches are enabled
 		end
@@ -981,6 +989,13 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 		event.name = "hide"
 		event.phase = "will"
 		event.sceneName = overlay.name
+		
+		-- if the overlay has a parent scene, add event.parent to the dispatched event
+		if lib._currentModule then
+			local currentScene = lib.loadedScenes[ lib._currentModule ]
+			event.parent = currentScene
+		end
+		
 		overlay:dispatchEvent( event )
 
 		if effect and effectList[effect] then
@@ -1080,6 +1095,13 @@ function lib.showOverlay( sceneName, options, argOffset )
 	event.phase = "will"
 	event.params = params
 	event.sceneName = sceneName
+	
+	-- if the overlay has a parent scene, add event.parent to the dispatched event
+	if lib._currentModule then
+		local currentScene = lib.loadedScenes[ lib._currentModule ]
+		event.parent = currentScene
+	end
+	
 	scene:dispatchEvent( event )
 
 	local function dispatchSceneEvents()
@@ -1089,10 +1111,18 @@ function lib.showOverlay( sceneName, options, argOffset )
 		event.phase = "did"
 		event.params = params
 		event.sceneName = sceneName
+		
+		-- if the overlay has a parent scene, add event.parent to the dispatched event
+		print( lib._currentModule )
+		if lib._currentModule then
+			local currentScene = lib.loadedScenes[ lib._currentModule ]
+			event.parent = currentScene
+		end
+		
 		scene:dispatchEvent( event )
 
 		-- dispatch "overlayBegan" event to current scene
-		if lib._currentModule then
+		--[[if lib._currentModule then
 			local current = lib.loadedScenes[lib._currentModule]
 			local event = {}
 			event.name = "show"
@@ -1101,7 +1131,7 @@ function lib.showOverlay( sceneName, options, argOffset )
 			event.params = params
 			event.sceneName = sceneName
 			current:dispatchEvent( event )
-		end
+		end]]--
 
 		lib._touchOverlay.isHitTestable = false	-- re-enable touches
 	end
@@ -1489,7 +1519,7 @@ end
 
 -- on low memory warning, automatically purge least recently used scene
 local function purgeLruScene( event )	-- Lru = "least recently used"
-	if lib.recycleAutomatically then
+	if lib.recycleOnLowMemory then
 		local lruScene = lib.loadedSceneModules[1]
 		
 		-- ensure the "lruScene" is not the currently loaded scene
@@ -1497,7 +1527,7 @@ local function purgeLruScene( event )	-- Lru = "least recently used"
 		-- currently transitioning-out scene from being purged)
 		if lruScene and lruScene ~= lib._currentModule and #lib.loadedSceneModules > 2 then
 			if lib.isDebug then
-				debug_print( "Auto-purging scene: " .. lruScene " due to low memory. If you want to disable auto-purging on low memory, set composer.recycleAutomatically to false." )
+				debug_print( "Auto-purging scene: " .. lruScene " due to low memory. If you want to disable auto-purging on low memory, set composer.recycleOnLowMemory to false." )
 			end
 			lib.removeScene( lruScene, true )
 		end
