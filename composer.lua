@@ -1039,8 +1039,16 @@ end
 -- creates the overlay scene
 
 function lib.showOverlay( sceneName, options, argOffset )
+
 	-- first, hide any overlay that may currently be showing
 	lib.hideOverlay()
+
+	-- if the overlay does not exist, we create it
+	if not lib._touchOverlay then
+		lib._touchOverlay = lib._createTouchOverlay()	-- creates overlay that disables touches on entire device screen (during scene transition)
+	else
+		lib._touchOverlay.isHitTestable = true	-- allow touches when invisible
+	end
 
 	-- auto-correct if colon syntax is used instead of dot
 	if sceneName == lib then
@@ -1113,7 +1121,6 @@ function lib.showOverlay( sceneName, options, argOffset )
 		event.sceneName = sceneName
 		
 		-- if the overlay has a parent scene, add event.parent to the dispatched event
-		print( lib._currentModule )
 		if lib._currentModule then
 			local currentScene = lib.loadedScenes[ lib._currentModule ]
 			event.parent = currentScene
