@@ -686,31 +686,29 @@ end
 
 lib.removeScene = function( sceneName, shouldRecycle )
 	-- Unload a scene and remove its display group
-	-- NOTE: global reference in composer.scenes is kept, unless shouldRecycle is set to false
-	local toRecycle = shouldRecycle or true
+	-- NOTE: global reference in composer.scenes is removed, unless shouldRecycle is set to true
 	
 	local scene = lib.loadedScenes[sceneName]
 	if scene and scene.view then
 		local event = {}
 		event.name = "destroy"
 		scene:dispatchEvent( event )
-		
-		-- remove module from scene history table
-		lib._removeFromHistory( sceneName )
-		
+				
 		if scene.view then
 			display.remove( scene.view )
 			scene.view = nil
 		end
 	elseif lib.isDebug then
 		if not scene then
-			debug_print( sceneName .. " was not purged because it does not exist. Use composer.loadScene() or composer.gotoScene()." )
+			debug_print( sceneName .. "'s was not removed because it does not exist. Use composer.loadScene() or composer.gotoScene()." )
 		elseif scene and not scene.view then
-			debug_print( sceneName .. " was not purged because it's view (display group) does not exist. This means it has already been purged or the view was never created." )
+			debug_print( sceneName .. "'s view was not purged because it's view (display group) does not exist. This means it has already been purged or the view was never created." )
 		end
 	end
 	
-	if toRecycle == false then
+	if not shouldRecycle then
+		-- remove module from scene history table
+		lib._removeFromHistory( sceneName )
 		-- remove global reference
 		lib.loadedScenes[sceneName] = nil
 		-- remove the package reference
@@ -741,34 +739,24 @@ lib.removeHidden = function( shouldRecycle )
 	lib.hideOverlay()
 	local purge_count = 0
 
+	print( "Noscenes: ", #lib.loadedSceneModules )
+
 	-- Purges all scenes (except for the one that is currently showing)
 	for i=#lib.loadedSceneModules,1,-1 do
 		local sceneToUnload = lib.loadedSceneModules[i]
 		
 		if sceneToUnload ~= lib._currentModule then
 			purge_count = purge_count + 1
-			lib.removeScene( sceneToUnload, true )
+			lib.removeScene( sceneToUnload, shouldRecycle )
 		end
 	end
 
 	if lib.isDebug then
-		local msg = "A total of [" .. purge_count .. "] scene(s) have been purged."
+		local msg = "A total of [" .. purge_count .. "] scene(s) have been removed."
 		if purge_count == 0 then
-			msg = "No scenes were purged."
+			msg = "No scenes were removed."
 		end
 		debug_print( msg )
-	end
-	
-	if shouldRecycle == false then
-
-		-- removes all scenes (except for the one that is currently showing)
-		for i=#lib.loadedSceneModules,1,-1 do
-			local sceneToUnload = lib.loadedSceneModules[i]
-
-			if sceneToUnload ~= lib._currentModule then
-				lib.removeScene( sceneToUnload, false )
-			end
-		end
 	end
 	
 end
