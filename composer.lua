@@ -739,8 +739,6 @@ lib.removeHidden = function( shouldRecycle )
 	lib.hideOverlay()
 	local purge_count = 0
 
-	print( "Noscenes: ", #lib.loadedSceneModules )
-
 	-- Purges all scenes (except for the one that is currently showing)
 	for i=#lib.loadedSceneModules,1,-1 do
 		local sceneToUnload = lib.loadedSceneModules[i]
