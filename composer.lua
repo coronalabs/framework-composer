@@ -1447,7 +1447,7 @@ function lib.gotoScene( ... )
 	
 	-- onComplete listener for first transition (previous scene; screenshot)
 	local transitionNewScene = function() 
-		lib._nextTransition( lib._currentScene, fx, effectTime, touchOverlay, screenshot, params )
+		lib._nextTransition( lib._currentScene, fx, effectTime, lib._touchOverlay, screenshot, params )
 	end
 	
 	-- transition the previous scene out (the screenshot):
@@ -1486,7 +1486,7 @@ function lib.gotoScene( ... )
 		end
 	else
 		--if screenshot then display.remove( screenshot ); screenshot = nil; end   -- for screen capture logic
-		touchOverlay.isHitTestable = false
+		lib._touchOverlay.isHitTestable = false
 		lib._currentScene.isVisible = true
 		lib._currentScene.x, lib._currentScene.y = 0, 0
 		
