@@ -778,7 +778,11 @@ lib.getSceneName = function( whichScene )
 	elseif "previous" == whichScene then
 		sceneName = lib._previousScene
 	elseif "overlay" == whichScene then
-		sceneName = lib._currentOverlayScene.name
+		if lib._currentOverlayScene then
+			sceneName = lib._currentOverlayScene.name
+		else
+			sceneName = nil
+		end
 	end
 	return sceneName
 end
