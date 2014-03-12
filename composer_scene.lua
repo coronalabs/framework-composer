@@ -21,7 +21,7 @@ local function print_r(object, mesg)
 		tag = ""
 	end
 
-	print(tag .. json.encode(object, { indent = true }))
+	--print(tag .. json.encode(object, { indent = true }))
 end
 
 -- Needed because the table order gets scrambled by JSON roundtrip
@@ -579,7 +579,6 @@ function Scene:createObject( objData )
 end
 
 function Scene:load( fileName )
-	print( "in load" )
 	self._objects = {}
 	self._hasPhysics = false
 
