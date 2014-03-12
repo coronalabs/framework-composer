@@ -38,9 +38,17 @@ end
 -----------------------------------------------------------------------------------------
 function Scene:initialize()
 	Super.initialize( self )
-	self._view = Super._view
+	self.view = Super.view
 	self._objects = {}
 	self._hasPhysics = false
+end
+
+function Scene:setComposerSceneName( file )
+	self._composerFileName = file
+end
+
+function Scene:getComposerSceneName()
+	return self._composerFileName
 end
 
 -------
@@ -308,8 +316,8 @@ local function _newLine ( params )
 	end
 	
 	-- FIXME: If I set both of these to 0.5 the line ends up in the wrong place
-	newLine.anchorX = 0.5
-	newLine.anchorY = 0.45
+	--newLine.anchorX = 0.5
+	--newLine.anchorY = 0.45
 
 	if params.lineWidth then
 		newLine.strokeWidth = params.lineWidth
@@ -509,96 +517,69 @@ function Scene:createObject( objData )
 			background:setFillColor( unpack_color(v.bgColor) )
 		end
 		background:toBack()
-		background.anchorX = 0
-		background.anchorY = 0
-	end
+	else
 
-	local object = self:newObject( v )
+		local object = self:newObject( v )
 
-	-- properties and positioning
-	if object then
+		-- properties and positioning
+		if object then
+
+			-- position
+			-- hacked based on the ouya coords, until we get this correctly exported
+			if not object.numChildren then
+				object.x = v.x
+				object.y = v.y
+				object.anchorX = 0
+				object.anchorY = 0
+			end
 	
-		-- position
-		-- hacked based on the ouya coords, until we get this correctly exported
-		object.x = v.x - 401
-		object.y = v.y - 202
+			-- rotation
+			if v.rotation then
+				object.rotation = v.rotation
+			end
 	
-		-- rotation
-		if v.rotation then
-			object.rotation = v.rotation
-		end
-	
-		-- tint color
-		if v.bgColor and v.type ~= "group" then
-			object:setFillColor( unpack_color( v.bgColor ) )
-		end
+			-- tint color
+			if v.bgColor and v.type ~= "group" then
+				object:setFillColor( unpack_color( v.bgColor ) )
+			end
 		
-		if v.alpha then
-			object.alpha = v.alpha
-		end
+			if v.alpha then
+				object.alpha = v.alpha
+			end
 		
-		-- mirrors code in CCSceneMethods.lua
-		if v.physicsEnabled then
-			local bodyShape, radius
-			if v.radius and v.radius ~= 0 then
-				radius = v.radius
-			else
-				if v.bodyShape then
-					bodyShape = {}
-					for i=1,#v.bodyShape do
-						bodyShape[#bodyShape+1] = v.bodyShape[i].x * v.xScale
-						bodyShape[#bodyShape+1] = v.bodyShape[i].y * v.yScale
+			-- mirrors code in CCSceneMethods.lua
+			if v.physicsEnabled then
+				local bodyShape, radius
+				if v.radius and v.radius ~= 0 then
+					radius = v.radius
+				else
+					if v.bodyShape then
+						bodyShape = {}
+						for i=1,#v.bodyShape do
+							bodyShape[#bodyShape+1] = v.bodyShape[i].x * v.xScale
+							bodyShape[#bodyShape+1] = v.bodyShape[i].y * v.yScale
+						end
 					end
 				end
-			end
-			physics.addBody( object, v.bodyType, { bounce=v.bounce, density=v.density, friction=v.friction, shape=bodyShape, radius=radius } )
+				physics.addBody( object, v.bodyType, { bounce=v.bounce, density=v.density, friction=v.friction, shape=bodyShape, radius=radius } )
 
-			if v.hasJoint == true then
-				object:addEventListener( "touch", dragBody )
-			end
-		end
-
---[[
-		-- physics props
-		if v.physicsEnabled == true then
-			if self._hasPhysics == false then
-				self._hasPhysics = true
-				physics.start()
-			end
-			
-			print("=========== v.id: "..tostring(v.id))
-			print("            v.type: "..tostring(v.type))
-			print("            v.radius: "..tostring(v.radius))
-			print("            v.bodyType: "..tostring(v.bodyType))
-			-- create the body
-			if v.bodyShape then
-				local shapeArray = {}
-				for i = 1, #v.bodyShape do
-					table.insert( shapeArray, v.bodyShape[ i ].x )
-					table.insert( shapeArray, v.bodyShape[ i ].y )
+				if v.hasJoint == true then
+					object:addEventListener( "touch", dragBody )
 				end
-				physics.addBody( object, v.bodyType, { density = v.density, friction = v.friction, bounce = v.bounce, shape = shapeArray } )
-			else
-				print("            no shapeArray ")
-				physics.addBody( object, v.bodyType, { density = v.density, friction = v.friction, bounce = v.bounce, radius = v.radius } )
 			end
-			
-			if v.hasJoint then
-				object:addEventListener( "touch", dragBody )
-			end
-			
-			
-			
-		end
---]]
 		
-		object.tag = v.id
+			object.tag = v.id
 
-		table.insert( self._objects, object )
+			table.insert( self._objects, object )
+			return object
+		end
+	
 	end
+	
 end
 
 function Scene:load( fileName )
+	print( "in load" )
 	self._objects = {}
 	self._hasPhysics = false
 
@@ -610,10 +591,18 @@ function Scene:load( fileName )
 	self:createObject( objData )
 
 	-- then all the objects
-	for i = 1, #root.id1.children do
-		local objData = root[ root.id1.children[ i ] ]
-		self:createObject( objData )
+	local function showObjects( group, parentGroup )
+		for i = 1, #group do
+			local objData = root[ group[ i ] ]
+			local obj = self:createObject( objData )
+			parentGroup:insert( obj )
+			if obj.numChildren then
+				showObjects( objData.children, obj )
+			end
+		end
 	end
+	
+	showObjects( root.id1.children, self.view )
 
 end
 

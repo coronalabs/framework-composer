@@ -9,6 +9,9 @@ local Library = require "CoronaLibrary"
 -- the transition object
 local lib = Library:new{ name='composer', publisherId='com.coronalabs', version=2 }
 
+-- the scene class
+local composerScene = require ( "lcomposer_scene" )
+
 -----------------------------------------------------------------------------------------
 
 -- top level group in which the scenes will be inserted
@@ -829,10 +832,18 @@ end
 
 lib.newScene = function( sceneName )
 	-- sceneName is optional if they don't want to use external module
-	local s = Runtime._super:new()	-- TODO: Get real event listener class (we're cheating by using this)
+	local s = composerScene:new()	-- TODO: Get real event listener class (we're cheating by using this)
 
 	if sceneName and not lib.loadedScenes[sceneName] then
 		lib.loadedScenes[sceneName] = s
+	end
+	
+	if sceneName then
+		-- replace all '.' with '/'
+		local basename = string.gsub( sceneName, "%.", '/' )
+		-- append file extension
+		local filename = basename .. '.ccscene'
+		s:setComposerSceneName( filename )
 	end
 	
 	return s
@@ -1342,8 +1353,6 @@ function lib.gotoScene( ... )
 
 			local function dispatch_createScene()
 				
-
-				
 				if not scene.view then
 					scene.view = display.newGroup()
 					scene:dispatchEvent( { name="create" } )
@@ -1388,6 +1397,9 @@ function lib.gotoScene( ... )
 		if not scene.view then
 			-- if view does not exist, create it and re-dispatch "createScene" event
 			scene.view = display.newGroup()
+			if nil ~= scene:getComposerSceneName() then
+				scene:load( scene:getComposerSceneName() )
+			end
 			local event = {}
 			event.name = "create"
 			event.params = params
@@ -1412,6 +1424,9 @@ function lib.gotoScene( ... )
 		local event = {}
 		event.name = "create"
 		event.params = params
+		if nil ~= scene:getComposerSceneName() then
+			scene:load( scene:getComposerSceneName() )
+		end
 		lib.loadedScenes[newScene]:dispatchEvent( event )
 	end
 	
