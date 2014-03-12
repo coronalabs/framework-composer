@@ -10,7 +10,7 @@ local Library = require "CoronaLibrary"
 local lib = Library:new{ name='composer', publisherId='com.coronalabs', version=2 }
 
 -- the scene class
-local composerScene = require ( "lcomposer_scene" )
+local composerScene = require ( "composer_scene" )
 
 -----------------------------------------------------------------------------------------
 
