@@ -549,6 +549,13 @@ function Scene:createObject( objData )
 		
 			-- mirrors code in CCSceneMethods.lua
 			if v.physicsEnabled then
+				
+				-- if at least one object has physics enabled, we enable physics
+				if not self._hasPhysics then
+					self._hasPhysics = true
+					physics.start()
+				end
+			
 				local bodyShape, radius
 				if v.radius and v.radius ~= 0 then
 					radius = v.radius
