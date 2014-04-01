@@ -29,7 +29,7 @@ local function unpack_color(rgbTable)
 	local r = rgbTable.r
 	local g = rgbTable.g
 	local b = rgbTable.b
-	return r/255, g/255, b/255
+	return r, g, b
 end
 
 -----------------------------------------------------------------------------------------
@@ -269,16 +269,6 @@ local function _newLine ( params )
 		end
 	end
 
-	--[[
-	if params.x then
-		table.insert( methodArgs, params.x )
-	end
-	
-	if params.y then
-		table.insert( methodArgs, params.y )
-	end
-	--]]
-
 	if params.x1 then
 		table.insert( methodArgs, params.x1 )
 	end
@@ -295,33 +285,18 @@ local function _newLine ( params )
 		table.insert( methodArgs, params.y2 )
 	end
 	
-	local newLine = display.newLine( unpack ( methodArgs ) )
-	
-	-- Needed but not allowed in V2 mode
-	-- newLine:setReferencePoint( display.CenterReferencePoint )
+	local newLine = display.newLine( params.x1, params.y1, params.x2, params.y2 )
 
 	if params.lineColor then
-		--[[
-		local colorTable = {}
-		for token in split( params.color, "," ) do
-   			table.insert( colorTable, tonumber( token ) )
-		end
-		newLine:setColor( unpack( colorTable ) )
-		--]]
-		-- there seems to be a disagreement about the limit
-		if params.lineColor.r == 255 then params.lineColor.r = 0 end
-		if params.lineColor.g == 255 then params.lineColor.g = 0 end
-		if params.lineColor.b == 255 then params.lineColor.b = 0 end
 		newLine:setStrokeColor( unpack_color(params.lineColor) )
 	end
 	
-	-- FIXME: If I set both of these to 0.5 the line ends up in the wrong place
-	--newLine.anchorX = 0.5
-	--newLine.anchorY = 0.45
-
 	if params.lineWidth then
 		newLine.strokeWidth = params.lineWidth
 	end
+	
+	newLine.x = params.x
+	newLine.y = params.y
 	
 	return newLine
 	
@@ -379,9 +354,6 @@ local function _newText ( params )
 		end
 		--]]
 		-- there seems to be a disagreement about the limit
-		if params.textColor.r == 255 then params.textColor.r = 0 end
-		if params.textColor.g == 255 then params.textColor.g = 0 end
-		if params.textColor.b == 255 then params.textColor.b = 0 end
 		newText:setFillColor( unpack_color(params.textColor) )
 	end
 	
@@ -390,6 +362,60 @@ local function _newText ( params )
 	end
 	
 	return newText
+	
+end
+
+-- transition handling
+function Scene:computeTransitions( object, transitionTable )
+		
+	local function createTransitionParams( object, objectModel )
+		if objectModel then
+			local timeline = objectModel
+
+			-- timeline contains the keyframes, that have:
+			-- index = the object index, position = the keyframe position in the timeline, time = the effective time of the keyframe,
+			-- params = all the tween params
+
+			-- first, we need a sorting of the timeline table based on keyframe positions
+			local tranTable = timeline
+			local function compare( a, b )
+				return a.position < b.position
+			end
+
+			table.sort(tranTable, compare)
+			
+			local copyTable = tranTable
+
+			-- if we have at least a keyframe
+			if #copyTable > 0 then
+
+				local initialDelay = copyTable[ 1 ].time
+				-- then we iterate the keyframes
+				-- if only one keyframe, we just show the object at the params contained in the keyframe
+				local transitionParams = copyTable[ 1 ].params
+				transitionParams.time = initialDelay
+				transition.to( object, transitionParams )
+
+				-- if more keyframes
+				if #copyTable > 1 then
+					local delayCount = initialDelay
+					for i = 2, #timeline do
+						-- setup the params
+						local transitionParams = copyTable[ i ].params
+
+						transitionParams.delay = delayCount
+						transitionParams.time = copyTable[ i ].time - copyTable[ i - 1 ].time
+						
+						transition.to( object, transitionParams )
+											
+						delayCount = delayCount + copyTable[ i ].time
+					end
+				end
+			end
+		end
+	end
+	
+	createTransitionParams( object, transitionTable )
 	
 end
 
@@ -569,7 +595,9 @@ function Scene:createObject( objData )
 					end
 				end
 				physics.addBody( object, v.bodyType, { bounce=v.bounce, density=v.density, friction=v.friction, shape=bodyShape, radius=radius } )
+				
 
+				
 				if v.hasJoint == true then
 					object:addEventListener( "touch", dragBody )
 				end
@@ -605,11 +633,14 @@ function Scene:load( fileName )
 			if obj.numChildren then
 				showObjects( objData.children, obj )
 			end
+			local tran = objData[ "timeline" ]
+			if ( #tran > 1 ) then
+				self:computeTransitions( obj, tran )
+			end
 		end
 	end
 	
 	showObjects( root.id1.children, self.view )
-
 end
 
 function Scene:getObjectByTag( searchTag )
