@@ -405,9 +405,7 @@ function Scene:computeTransitions( object, transitionTable )
 
 						transitionParams.delay = delayCount
 						transitionParams.time = copyTable[ i ].time - copyTable[ i - 1 ].time
-						
 						transition.to( object, transitionParams )
-											
 						delayCount = delayCount + copyTable[ i ].time
 					end
 				end
@@ -551,12 +549,9 @@ function Scene:createObject( objData )
 		if object then
 
 			-- position
-			-- hacked based on the ouya coords, until we get this correctly exported
 			if not object.numChildren then
 				object.x = v.x
 				object.y = v.y
-				object.anchorX = 0
-				object.anchorY = 0
 			end
 	
 			-- rotation
@@ -634,7 +629,7 @@ function Scene:load( fileName )
 				showObjects( objData.children, obj )
 			end
 			local tran = objData[ "timeline" ]
-			if ( #tran > 1 ) then
+			if ( #tran > 0 ) then
 				self:computeTransitions( obj, tran )
 			end
 		end
