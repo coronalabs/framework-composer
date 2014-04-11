@@ -406,7 +406,7 @@ function Scene:computeTransitions( object, transitionTable )
 						transitionParams.delay = delayCount
 						transitionParams.time = copyTable[ i ].time - copyTable[ i - 1 ].time
 						transition.to( object, transitionParams )
-						delayCount = delayCount + copyTable[ i ].time
+						delayCount = delayCount + transitionParams.time
 					end
 				end
 			end
