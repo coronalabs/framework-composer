@@ -130,7 +130,7 @@ local function _newImage( params )
 	end
 	
 	newImage = display.newImage( unpack( methodArgs ) )
-
+	
 	newImage.width = newImage.width * params.xScale
 	newImage.height = newImage.height * params.yScale
 
@@ -563,6 +563,11 @@ function Scene:createObject( objData )
 			if v.bgColor and v.type ~= "group" then
 				object:setFillColor( unpack_color( v.bgColor ) )
 			end
+			
+			-- tint color for image objects
+			if v.fillColor and v.fillColor.r and v.fillColor.g and v.fillColor.b then
+				object:setFillColor( v.fillColor.r, v.fillColor.g, v.fillColor.b )
+			end
 		
 			if v.alpha then
 				object.alpha = v.alpha
@@ -596,6 +601,44 @@ function Scene:createObject( objData )
 				if v.hasJoint == true then
 					object:addEventListener( "touch", dragBody )
 				end
+				
+				--further physics properties
+				if v.isSensor then
+					object.isSensor = v.isSensor
+				end
+				
+				if v.isBullet then
+					object.isBullet = v.isBullet
+				end
+
+				if v.isFixedRotation then
+					object.isFixedRotation = v.isFixedRotation
+				end				
+
+				if v.isBodyActive then
+					object.isBodyActive = v.isBodyActive
+				end	
+
+				if v.isBodyActive then
+					object.isBodyActive = v.isBodyActive
+				end
+				
+				if v.linearDamping then
+					object.linearDamping = v.linearDamping
+				end	
+
+				if v.angularDamping then
+					object.angularDamping = v.angularDamping
+				end	
+
+				if v.isSleepingAllowed then
+					object.isSleepingAllowed = v.isSleepingAllowed
+				end					
+
+				if v.isAwake then
+					object.isAwake = v.isAwake
+				end	
+				
 			end
 		
 			object.tag = v.id
