@@ -394,7 +394,11 @@ function Scene:computeTransitions( object, transitionTable )
 				-- if only one keyframe, we just show the object at the params contained in the keyframe
 				local transitionParams = copyTable[ 1 ].params
 				transitionParams.time = initialDelay
-				transition.to( object, transitionParams )
+				-- OBSOLETE: instead of transitioning here, we just place the object properties
+				--transition.to( object, transitionParams )
+				for k, v in pairs( transitionParams ) do
+					object[ k ] = v
+				end
 
 				-- if more keyframes
 				if #copyTable > 1 then
