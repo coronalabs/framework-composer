@@ -1397,8 +1397,10 @@ function lib.gotoScene( ... )
 		if not scene.view then
 			-- if view does not exist, create it and re-dispatch "createScene" event
 			scene.view = display.newGroup()
-			if nil ~= scene:getComposerSceneName() then
-				scene:load( scene:getComposerSceneName() )
+			
+			local currentCcFile = scene:getComposerSceneName()
+			if nil ~= currentCcFile and lib._sceneFileExists( currentCcFile ) then
+				scene:load( currentCcFile )
 			end
 			local event = {}
 			event.name = "create"
@@ -1424,8 +1426,10 @@ function lib.gotoScene( ... )
 		local event = {}
 		event.name = "create"
 		event.params = params
-		if nil ~= scene:getComposerSceneName() then
-			scene:load( scene:getComposerSceneName() )
+
+		local currentCcFile = scene:getComposerSceneName()
+		if nil ~= currentCcFile and lib._sceneFileExists( currentCcFile ) then
+			scene:load( currentCcFile )
 		end
 		lib.loadedScenes[newScene]:dispatchEvent( event )
 	end
@@ -1565,6 +1569,26 @@ lib.getVariable = function( key )
 	if nil ~= key then
 		return lib.variables[ key ]
 	end
+end
+
+lib._sceneFileExists = function( fileName )
+
+	local fileExists = false
+
+	local path = system.pathForFile( fileName, system.ResourceDirectory )
+	
+	if path then
+	
+		local testHandler = io.open( path )
+	
+		if testHandler then
+		   fileExists = true
+		   testHandler:close()
+		end
+	
+	end
+	
+	return fileExists
 end
 
 return lib
