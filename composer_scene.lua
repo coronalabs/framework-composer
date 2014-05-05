@@ -357,6 +357,14 @@ local function _newText ( params )
 		newText:setFillColor( unpack_color(params.textColor) )
 	end
 	
+	if params.xScale then
+		newText.xScale = params.xScale
+	end
+	
+	if params.yScale then
+		newText.yScale = params.yScale
+	end
+	
 	if params.width then
 		newText.width = params.width
 	end
@@ -540,7 +548,7 @@ function Scene:createObject( objData )
 	display.setDefault( "background", 1, 1, 1 )
 
 	if v.children and v.sceneName then
-		local background = display.newRect( display.contentWidth/2, display.contentHeight/2, display.actualContentWidth, display.actualContentHeight )
+		local background = display.newRect( display.contentWidth * 0.5, display.contentHeight * 0.5, display.contentWidth, display.contentHeight )
 		if v.bgColor then
 			background:setFillColor( unpack_color(v.bgColor) )
 		end
