@@ -676,8 +676,7 @@ function Scene:load( fileName )
 
 	-- then all the objects
 	local function showObjects( group, parentGroup )
-		
-		for i = #group, 1, -1 do
+		for i = 1, #group do
 			local objData = root[ group[ i ] ]
 			local obj = self:createObject( objData )
 			parentGroup:insert( obj )
