@@ -377,6 +377,11 @@ end
 function Scene:computeTransitions( object, transitionTable )
 		
 	local function createTransitionParams( object, objectModel )
+
+		if not object.isVisible then
+			return
+		end
+	
 		if objectModel then
 			local timeline = objectModel
 
@@ -652,6 +657,8 @@ function Scene:createObject( objData )
 				end	
 				
 			end
+		
+			object.isVisible = v.isVisible
 		
 			object.tag = v.id
 
