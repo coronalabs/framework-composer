@@ -684,34 +684,19 @@ function Scene:load( fileName )
 	-- then all the objects
 	local function showObjects( group, parentGroup )
 		
-		if parentGroup ~= self.view then
-			for i = #group, 1, -1 do
-				local objData = root[ group[ i ] ]
-				local obj = self:createObject( objData )
-				parentGroup:insert( obj )
-				if obj.numChildren then
-					showObjects( objData.children, obj )
-				end
-				local tran = objData[ "timeline" ]
-				if ( #tran > 0 ) then
-					self:computeTransitions( obj, tran )
-				end
+		for i = 1, #group do
+			local objData = root[ group[ i ] ]
+			local obj = self:createObject( objData )
+			parentGroup:insert( obj )
+			if obj.numChildren then
+				showObjects( objData.children, obj )
 			end
-		else
-			for i = 1, #group do
-				local objData = root[ group[ i ] ]
-				local obj = self:createObject( objData )
-				parentGroup:insert( obj )
-				if obj.numChildren then
-					showObjects( objData.children, obj )
-				end
-				local tran = objData[ "timeline" ]
-				if ( #tran > 0 ) then
-					self:computeTransitions( obj, tran )
-				end
+			local tran = objData[ "timeline" ]
+			if ( #tran > 0 ) then
+				self:computeTransitions( obj, tran )
 			end
-
 		end
+
 	end
 	
 	showObjects( root.id1.children, self.view )
