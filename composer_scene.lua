@@ -129,6 +129,8 @@ local function _newImage( params )
 		table.insert( methodArgs, params.y )
 	end
 	
+	table.insert( methodArgs, true )
+	
 	newImage = display.newImage( unpack( methodArgs ) )
 	
 	newImage.width = newImage.width * params.xScale
