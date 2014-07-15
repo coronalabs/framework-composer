@@ -906,7 +906,8 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 	options.time = effectTime or 500
 	options.transition = fx.to.transition
 	options.onComplete = disableOverlay
-	
+	options.generatedBy = "composer"
+
 	if oldScreenshot and fx.hideOnOut then
 		oldScreenshot.isVisible = false
 	end
@@ -1025,6 +1026,7 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 			o.time = effectTime
 			o.transition = fx.transition
 			o.onComplete = overlayTransitionComplete
+			o.generatedBy = "composer"
 
 			local fxTransition = transition.to( overlay.view, o ) 
 		else
@@ -1173,6 +1175,7 @@ function lib.showOverlay( sceneName, options, argOffset )
 		o.time = fxTime
 		o.transition = fx.transition
 		o.onComplete = overlayTransitionComplete
+		o.generatedBy = "composer"
 
 		local fxTransition = transition.to( scene.view, o )
 	else
@@ -1473,7 +1476,8 @@ function lib.gotoScene( ... )
 		options.transition = fx.from.transition
 		options.onComplete = transitionNewScene
 		options.delay = 1 -- Delay the transition from starting by 1ms to keep the old scenes transition and the new scenes transition in sync
-		
+		options.generatedBy = "composer"
+
 		-- for effects where both scenes should transition concurrently, remove onComplete listener
 		if fx.concurrent then options.onComplete = nil; end
 		
