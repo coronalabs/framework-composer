@@ -591,6 +591,10 @@ function Scene:createObject( objData )
 			if v.alpha then
 				object.alpha = v.alpha
 			end
+			
+			if v.fillEffect then
+				object.fill.effect = v.fillEffect
+			end
 		
 			-- mirrors code in CCSceneMethods.lua
 			if v.physicsEnabled then
