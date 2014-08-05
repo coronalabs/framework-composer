@@ -133,8 +133,10 @@ local function _newImage( params )
 	
 	newImage = display.newImage( unpack( methodArgs ) )
 	
-	newImage.width = newImage.width * params.xScale
-	newImage.height = newImage.height * params.yScale
+	if params.physicsEnabled then
+		newImage.width = newImage.width * params.xScale
+		newImage.height = newImage.height * params.yScale
+	end
 
 	return newImage
 	
@@ -161,11 +163,19 @@ local function _newRect ( params )
 	end
 
 	if params.rectWidth then
-		table.insert( methodArgs, params.rectWidth * params.xScale )
+		if params.physicsEnabled then
+			table.insert( methodArgs, params.rectWidth * params.xScale )
+		else
+			table.insert( methodArgs, params.rectWidth )
+		end
 	end
 	
 	if params.rectHeight then
-		table.insert( methodArgs, params.rectHeight * params.yScale )
+		if params.physicsEnabled then
+			table.insert( methodArgs, params.rectHeight * params.yScale )
+		else
+			table.insert( methodArgs, params.rectHeight )
+		end
 	end
 	
 	local newRect = display.newRect( unpack ( methodArgs ) )
@@ -226,8 +236,15 @@ local function _newCircle ( params )
 	
 	local newCircle = display.newCircle( unpack ( methodArgs ) )
 	
-	newCircle.width = newCircle.width * params.xScale
-	newCircle.height = newCircle.height * params.yScale
+	--newCircle.width = newCircle.width * params.xScale
+	--newCircle.height = newCircle.height * params.yScale
+	newCircle.width = newCircle.width
+	newCircle.height = newCircle.height
+
+	if params.physicsEnabled then
+		newCircle.width = newCircle.width * params.xScale
+		newCircle.height = newCircle.height * params.yScale
+	end
 
 	if params.fillColor then
 		--[[
@@ -359,12 +376,14 @@ local function _newText ( params )
 		newText:setFillColor( unpack_color(params.textColor) )
 	end
 	
-	if params.xScale then
-		newText.xScale = params.xScale
-	end
-	
-	if params.yScale then
-		newText.yScale = params.yScale
+	if params.physicsEnabled then
+		if params.xScale then
+			--newText.xScale = params.xScale
+		end
+		
+		if params.yScale then
+			--newText.yScale = params.yScale
+		end
 	end
 	
 	if params.width then
