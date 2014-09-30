@@ -574,7 +574,7 @@ function Scene:createObject( objData )
 	display.setDefault( "background", 1, 1, 1 )
 
 	if v.children and v.sceneName then
-		local background = display.newRect( display.contentWidth * 0.5, display.contentHeight * 0.5, display.contentWidth, display.contentHeight )
+		local background = display.newRect( self.view, display.contentWidth * 0.5, display.contentHeight * 0.5, display.contentWidth, display.contentHeight )
 		if v.bgColor then
 			background:setFillColor( unpack_color(v.bgColor) )
 		end
