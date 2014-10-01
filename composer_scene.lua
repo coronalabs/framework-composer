@@ -137,6 +137,21 @@ local function _newImage( params )
 		newImage.width = newImage.width * params.xScale
 		newImage.height = newImage.height * params.yScale
 	end
+	
+	if params.strokeColor then
+		--[[
+		local strokeTable = {}
+		for token in split( params.strokeColor, "," ) do
+   			table.insert( strokeTable, tonumber( token ) )
+		end
+		newRect:setStrokeColor( unpack( strokeTable ) )
+		--]]
+		newImage:setStrokeColor( unpack_color(params.strokeColor) )
+	end
+	
+	if params.strokeWidth then
+		newImage.strokeWidth = params.strokeWidth
+	end
 
 	return newImage
 	
