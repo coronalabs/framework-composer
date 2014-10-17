@@ -594,6 +594,16 @@ function Scene:createObject( objData )
 			background:setFillColor( unpack_color(v.bgColor) )
 		end
 		background:toBack()
+		
+		-- global physics properties
+        if v.xGravity and v.yGravity then
+        	if not self._hasPhysics then
+		        self._hasPhysics = true
+        		physics.start()
+            end
+            physics.setGravity( tonumber( v.xGravity ), tonumber( v.yGravity ) )
+        end
+		
 	else
 
 		local object = self:newObject( v )
