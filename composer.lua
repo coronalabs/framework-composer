@@ -1101,6 +1101,12 @@ function lib.showOverlay( sceneName, options, argOffset )
 		event.name = "create"
 		event.params = params
 		event.sceneName = sceneName
+		
+		local currentCcFile = scene:getComposerSceneName()
+		if nil ~= currentCcFile and lib._sceneFileExists( currentCcFile ) then
+			scene:load( currentCcFile )
+		end
+		
 		lib.loadedScenes[sceneName]:dispatchEvent( event )
 	end
 
