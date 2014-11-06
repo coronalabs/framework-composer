@@ -63,6 +63,7 @@ local _stringFormat = string.format
 local _getInfo = system.getInfo
 local displayW = display.contentWidth
 local displayH = display.contentHeight
+local isGraphicsV1 = ( 1 == display.getDefault( "graphicsCompatibility" ) )
 
 -----------------------------------------------------------------------------------------
 
@@ -666,6 +667,10 @@ end
 lib._createTouchOverlay = function()
 	
 	local overlayRect = display.newRect( 0, 0, displayW, displayH )
+	if not isGraphicsV1 then
+		overlayRect.anchorX = 0
+		overlayRect.anchorY = 0
+	end
 	overlayRect:setFillColor( 0 )
 	overlayRect.isVisible = false
 	overlayRect.isHitTestable = true	-- allow touches when invisible
