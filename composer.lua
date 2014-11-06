@@ -809,7 +809,6 @@ lib.getScene = function( sceneName )
 	else
 		
 		scene = lib.loadedScenes[ sceneName ]
-
 		if lib.isDebug and not scene then
 			debug_print( "getScene: The specified scene, " .. sceneName .. ", does not exist." )
 		end
@@ -1334,54 +1333,72 @@ function lib.gotoScene( ... )
 		lib._currentModule = newScene
 		
 	elseif lib._currentModule == newScene then
+		-- if the scene is the same with the one we have on screen
+	
+		if not lib._currentModule then
+			return
+		end
 		
-			-- if the scene is the same with the one we have on screen
-			if not lib._currentModule then return; end
-			lib.hideOverlay()	-- hide any overlay/popup scenes that may be showing
+		lib.hideOverlay()	-- hide any overlay/popup scenes that may be showing
 
-			local scene = lib.getScene( lib._currentModule )
-			if not scene then return; end
-
-			if options and options.recreate == true then
-				lib.removeScene(lib._currentModule, true)
-			end
-
-			local function next_render( callback )
-				return timer.performWithDelay( 1, callback, 1 )
-			end
-
-			local function dispatch_enterScene()
-				scene:dispatchEvent( { name="show", phase = "did" } )
-			end
-
-			local function dispatch_willEnterScene()
-				scene:dispatchEvent( { name="show", phase="will" } )
-				next_render( dispatch_enterScene )
-			end
-
-			local function dispatch_createScene()
-				
-				if not scene.view then
-					scene.view = display.newGroup()
-					scene:dispatchEvent( { name="create" } )
-					lib._currentScene = scene.view
-					stage:insert( lib._currentScene )
+		local scene = lib.getScene( lib._currentModule )
+		
+		if not scene then
+			-- no scene exists, we create it
+			local success, msg = pcall( function() lib.loadedScenes[newScene] = require( newScene ) end )
+			if not success and msg then
+				if lib.isDebug then
+					debug_print( "Cannot transition to scene: " .. _toString(newScene) .. ". There is either an error in the scene module, or you are attempting to go to a scene that does not exist. If you called composer.removeScene() on a scene that is NOT represented by a module, the scene must be re-created before transitioning back to it." )
 				end
-				next_render( dispatch_willEnterScene )
+				error( msg )
 			end
-
-			local function dispatch_didExitScene()
-				scene:dispatchEvent( { name="hide", phase = "did" } )
-				next_render( dispatch_createScene )
+			scene = lib.loadedScenes[newScene]
+			if _type(scene) == 'boolean' then
+				error( "Attempting to load scene from invalid scene module (" .. sceneName .. ".lua). Did you forget to return the scene object at the end of the scene module? (e.g. 'return scene')" )
 			end
+		end		
+		
+		if options and options.recreate == true then
+			lib.removeScene(lib._currentModule, true)
+		end
 
-			scene:dispatchEvent( { name="hide", phase = "will" } )
+		local function next_render( callback )
+			return timer.performWithDelay( 1, callback, 1 )
+		end
 
-			next_render( dispatch_didExitScene )
+		local function dispatch_enterScene()
+			scene:dispatchEvent( { name="show", phase = "did" } )
+		end
 
-			-- end if the scene is the same with the one we have on screen
+		local function dispatch_willEnterScene()
+			scene:dispatchEvent( { name="show", phase="will" } )
+			next_render( dispatch_enterScene )
+		end
+
+		local function dispatch_createScene()
+			
+			if not scene.view then
+				scene.view = display.newGroup()
+				scene:dispatchEvent( { name="create", params = params } )
+				lib._currentScene = scene.view
+				stage:insert( lib._currentScene )
+			end
+			next_render( dispatch_willEnterScene )
+		end
+
+		local function dispatch_didExitScene()
+			scene:dispatchEvent( { name="hide", phase = "did" } )
+			next_render( dispatch_createScene )
+		end
+
+		scene:dispatchEvent( { name="hide", phase = "will" } )
+
+		next_render( dispatch_didExitScene )
+
+		-- end if the scene is the same with the one we have on screen
 		
 		return
+		
 	elseif lib._currentModule then
 		lib._previousScene = lib._currentModule
 	end
