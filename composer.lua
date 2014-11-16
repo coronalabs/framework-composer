@@ -887,7 +887,7 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 		delayTime = effectTime or 500
 	end
 	
-	timer.performWithDelay( delayTime, function()
+	timer.performWithDelay( delayTime - 15, function()
 	
 	-- dispatch previous scene's didExitScene event
 	local previous = lib.getSceneName( "previous" )
