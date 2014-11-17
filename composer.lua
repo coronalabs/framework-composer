@@ -885,9 +885,12 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 	local delayTime = 0
 	if isSlideTransition then
 		delayTime = effectTime or 500
+		-- trigger the hide event a bit earlier than the actual transition end
+		-- reason for this is that at the actual transition end, the scene object does not exist anymore.
+		delayTime = delayTime - 20 
 	end
 	
-	timer.performWithDelay( delayTime - 15, function()
+	timer.performWithDelay( delayTime, function()
 	
 	-- dispatch previous scene's didExitScene event
 	local previous = lib.getSceneName( "previous" )
