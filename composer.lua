@@ -887,7 +887,7 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 		delayTime = effectTime or 500
 		-- trigger the hide event a bit earlier than the actual transition end
 		-- reason for this is that at the actual transition end, the scene object does not exist anymore.
-		delayTime = delayTime - 20 
+		delayTime = delayTime - 50 
 	end
 	
 	timer.performWithDelay( delayTime, function()
