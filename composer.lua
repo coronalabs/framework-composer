@@ -859,13 +859,22 @@ end
 -- private
 -- creates the transition for the next scene
 
-lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScreenshot, customParams, isSlideTransition )
+lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScreenshot, customParams )
 	
 	-- remove touch disabling overlay rectangle:
 	local disableOverlay = function()
 		lib._touchOverlay.isHitTestable = false	-- disable touches when invisible
 		--display.remove( oldScreenshot ); oldScreenshot = nil
 		if oldScreenshot then oldScreenshot.isVisible = false; end
+
+		-- dispatch previous scene's didExitScene event
+		local previous = lib.getSceneName( "previous" )
+		if previous and lib.loadedScenes[previous] then
+			local event = {}
+			event.name = "hide"
+			event.phase = "did"
+			lib.loadedScenes[previous]:dispatchEvent( event )
+		end
 
 		-- dispatch scene's enterScene event
 		if lib._currentModule and lib.loadedScenes[lib._currentModule] then
@@ -882,26 +891,7 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 		end
 	end
 	
-	local delayTime = 0
-	if isSlideTransition then
-		delayTime = effectTime or 500
-		-- trigger the hide event a bit earlier than the actual transition end
-		-- reason for this is that at the actual transition end, the scene object does not exist anymore.
-		delayTime = delayTime - 50 
-	end
-	
-	timer.performWithDelay( delayTime, function()
-	
-	-- dispatch previous scene's didExitScene event
-	local previous = lib.getSceneName( "previous" )
-	if previous and lib.loadedScenes[previous] then
-		local event = {}
-		event.name = "hide"
-		event.phase = "did"
-		lib.loadedScenes[previous]:dispatchEvent( event )
-	end
-	
-	end )
+
 
 	-- dispatch show event, phase will
 	if lib.loadedScenes[lib._currentModule] then
@@ -1498,8 +1488,8 @@ function lib.gotoScene( ... )
     end
 	
 	-- onComplete listener for first transition (previous scene; screenshot)
-	local transitionNewScene = function( isSlideTransition ) 
-		lib._nextTransition( lib._currentScene, fx, effectTime, lib._touchOverlay, screenshot, params, isSlideTransition )
+	local transitionNewScene = function() 
+		lib._nextTransition( lib._currentScene, fx, effectTime, lib._touchOverlay, screenshot, params )
 	end
 	
 	-- transition the previous scene out (the screenshot):
@@ -1531,7 +1521,7 @@ function lib.gotoScene( ... )
 				-- first and next scene should transition at the same time (e.g. scene1 -> scene2 )
 
 				local sceneTransition = transition.to( screenshot, options )
-				transitionNewScene( true )
+				transitionNewScene()
 			end
 		else
 			-- no screenshot, meaning there was no previous scene (first scene; coming from main.lua, most likely)
