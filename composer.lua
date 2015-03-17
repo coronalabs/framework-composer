@@ -1111,6 +1111,10 @@ function lib.showOverlay( sceneName, options, argOffset )
 		
 		lib.loadedScenes[sceneName]:dispatchEvent( event )
 	end
+	
+	-- assign the scene name and the scene object to library variables
+	lib._currentOverlayScene = scene
+	lib._currentOverlayScene.name = sceneName
 
 	-- dispatch show event, phase will
 	local event = {}
@@ -1198,9 +1202,6 @@ function lib.showOverlay( sceneName, options, argOffset )
 
 		dispatchSceneEvents()
 	end
-
-	lib._currentOverlayScene = scene
-	lib._currentOverlayScene.name = sceneName
 
 	if isModal then
 		lib._modalRect = display.newRect( 0, 0, display.actualContentWidth * 1.25, display.actualContentHeight * 1.25 )
