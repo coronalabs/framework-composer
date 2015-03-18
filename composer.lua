@@ -1376,7 +1376,7 @@ function lib.gotoScene( ... )
 		end
 
 		local function dispatch_enterScene()
-			scene:dispatchEvent( { name="show", phase = "did" } )
+			scene:dispatchEvent( { name="show", phase = "did", params = params } )
 		end
 
 		local function dispatch_willEnterScene()
