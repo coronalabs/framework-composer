@@ -710,7 +710,8 @@ function Scene:createObject( objData )
 		
 			object.isVisible = v.isVisible
 		
-			object.tag = v.id
+			object.id = v.id
+			object.tag = v.tag
 
 			table.insert( self._objects, object )
 			return object
@@ -752,10 +753,66 @@ function Scene:load( fileName )
 	showObjects( root.id1.children, self.view )
 end
 
+function Scene:getObjectsByTag(...)
+	local objectsTable = {}
+	for i = 1, #self._objects do
+		local currentObject = self._objects[ i ]
+		for i, v in ipairs( arg ) do
+			if currentObject.tag == v then
+				table.insert( objectsTable, currentObject )
+			end
+		end
+	end
+
+	if #objectsTable > 0 then
+		return objectsTable
+	else
+		return nil
+	end
+end
+
 function Scene:getObjectByTag( searchTag )
 	for i = 1, #self._objects do
 		local currentObject = self._objects[ i ]
 		if currentObject.tag == searchTag then
+			return currentObject
+		end
+	end
+	return nil
+end
+
+function Scene:getObjectsByName(...)
+	local objectsTable = {}
+	for i = 1, #self._objects do
+		local currentObject = self._objects[ i ]
+		for i, v in ipairs( arg ) do
+			if currentObject.id == v then
+				table.insert( objectsTable, currentObject )
+			end
+		end
+	end
+
+	if #objectsTable > 0 then
+		return objectsTable
+	else
+		return nil
+	end
+end
+
+function Scene:getObjectByName( searchName )
+	for i = 1, #self._objects do
+		local currentObject = self._objects[ i ]
+		if currentObject.id == searchName then
+			return currentObject
+		end
+	end
+	return nil
+end
+
+function Scene:getGroupByName( searchName )
+	for i = 1, #self._objects do
+		local currentObject = self._objects[ i ]
+		if currentObject.id == searchName and currentObject.numChildren then
 			return currentObject
 		end
 	end
