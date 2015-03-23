@@ -133,10 +133,10 @@ local function _newImage( params )
 	
 	newImage = display.newImage( unpack( methodArgs ) )
 	
-	if params.physicsEnabled then
-		newImage.width = newImage.width * params.xScale
-		newImage.height = newImage.height * params.yScale
-	end
+--	if params.physicsEnabled then
+--		newImage.width = newImage.width * params.xScale
+--		newImage.height = newImage.height * params.yScale
+--	end
 	
 	if params.strokeColor then
 		--[[
@@ -178,19 +178,11 @@ local function _newRect ( params )
 	end
 
 	if params.rectWidth then
-		if params.physicsEnabled then
-			table.insert( methodArgs, params.rectWidth * params.xScale )
-		else
-			table.insert( methodArgs, params.rectWidth )
-		end
+		table.insert( methodArgs, params.rectWidth )
 	end
 	
 	if params.rectHeight then
-		if params.physicsEnabled then
-			table.insert( methodArgs, params.rectHeight * params.yScale )
-		else
-			table.insert( methodArgs, params.rectHeight )
-		end
+		table.insert( methodArgs, params.rectHeight )
 	end
 	
 	local newRect = display.newRect( unpack ( methodArgs ) )
@@ -255,11 +247,6 @@ local function _newCircle ( params )
 	--newCircle.height = newCircle.height * params.yScale
 	newCircle.width = newCircle.width
 	newCircle.height = newCircle.height
-
-	if params.physicsEnabled then
-		newCircle.width = newCircle.width * params.xScale
-		newCircle.height = newCircle.height * params.yScale
-	end
 
 	if params.fillColor then
 		--[[
