@@ -565,6 +565,12 @@ function Scene:loadFile ( filename )
     end
 end
 
+function Scene:startPhysics()
+	local physics = physics or require "physics"
+	physics.stop()
+	physics.start()
+end
+
 function Scene:createObject( objData )
 
 	local v = objData
