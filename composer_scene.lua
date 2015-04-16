@@ -571,6 +571,7 @@ function Scene:startPhysics()
 	physics.start()
 end
 
+
 function Scene:createObject( objData )
 
 	local v = objData
@@ -584,7 +585,7 @@ function Scene:createObject( objData )
 	if v.children and v.sceneName then
 		local background = display.newRect( self.view, display.contentWidth * 0.5, display.contentHeight * 0.5, display.contentWidth, display.contentHeight )
 		if v.bgColor then
-			background:setFillColor( unpack_color(v.bgColor) )
+			background:setFillColor( v.bgColor.r, v.bgColor.g, v.bgColor.b, v.bgColor.a )
 		end
 		background:toBack()
 		
