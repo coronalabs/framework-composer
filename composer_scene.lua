@@ -736,10 +736,6 @@ function Scene:load( fileName )
 			if obj.numChildren then
 				showObjects( objData.children, obj )
 			end
-			local tran = objData[ "timeline" ]
-			if ( #tran > 0 ) then
-				self:computeTransitions( obj, tran )
-			end
 		end
 
 	end
