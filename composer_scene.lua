@@ -706,12 +706,25 @@ function Scene:createObject( objData )
 		
 			object.id = v.id
 			object.tag = v.tag
+			
+			if v.isImage and v.width or v.height then
+				if v.width then
+					object.width = v.width
+				end
+				
+				if v.height then
+					object.height = v.height
+				end
+			end
 
 			table.insert( self._objects, object )
 			return object
+			
 		end
 	
 	end
+	
+
 	
 end
 
