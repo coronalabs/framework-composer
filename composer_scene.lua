@@ -716,6 +716,14 @@ function Scene:createObject( objData )
 					object.height = v.height
 				end
 			end
+			
+			if v.xScale then
+				object.xScale = v.xScale
+			end
+			
+			if v.yScale then
+				object.yScale = v.yScale
+			end
 
 			table.insert( self._objects, object )
 			return object
