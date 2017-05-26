@@ -1560,7 +1560,7 @@ function lib.gotoScene( ... )
 			
 
 			if lib.recycleOnSceneChange then
-				lib.removeHidden()
+				lib.removeHidden(lib.recycleOnSceneChange)
 			end
 		end
 	end
