@@ -928,7 +928,6 @@ end
 -- hides the overlay scene
 
 lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
-	display.remove( lib._modalRect ); lib._modalRect = nil
 
 	local overlay = lib._currentOverlayScene
 	lib._currentOverlayScene = nil
@@ -955,6 +954,9 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 		end
 
 		local function dispatchSceneEvents()
+			-- moved here because the modal dialog rectangle was being removed while the overlay scene
+			-- was still on the screen.
+			display.remove( lib._modalRect ); lib._modalRect = nil
 			-- dispatch "exitScene" event on overlay scene before purge/removal
 			local event = {}
 			event.name = "hide"
