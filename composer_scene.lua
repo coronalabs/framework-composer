@@ -1,7 +1,10 @@
 -----------------------------------------------------------------------------------------
 --
+-- Corona Labs
+--
 -- composer_scene.lua
 --
+-- Code is MIT licensed; see https://www.coronalabs.com/links/code/license
 -----------------------------------------------------------------------------------------
 
 -- still cheating. Which object is the Runtime super? EventListener?
