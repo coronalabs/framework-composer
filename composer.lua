@@ -13,9 +13,6 @@ local Library = require "CoronaLibrary"
 -- the transition object
 local lib = Library:new{ name='composer', publisherId='com.coronalabs', version=2 }
 
--- the scene class
-local composerScene = require ( "composer_scene" )
-
 -----------------------------------------------------------------------------------------
 
 -- top level group in which the scenes will be inserted
@@ -686,15 +683,9 @@ end
 
 -----------------------------------------------------------------------------------------
 
--- purgeScene
+-- removeScene
 -- public
 -- removes the scene (display group) from memory
-
--- TODO: This is deprecated.
-lib.purgeScene = function( sceneName )
-	print( "WARNING: composer.purgeScene() is deprecated. This now calls through to composer.removeScene( true ) instead." )
-	lib.removeScene( sceneName, true )
-end
 
 lib.removeScene = function( sceneName, shouldRecycle )
 	-- Unload a scene and remove its display group
@@ -731,21 +722,9 @@ end
 
 -----------------------------------------------------------------------------------------
 
--- purgeAll
+-- removeHidden
 -- public
 -- purges all the loaded scenes
-
--- TODO: This is deprecated.
-lib.purgeAll = function()
-	print("WARNING: composer.purgeAll() is deprecated. This now calls through to composer.removeHidden( true ) instead." )
-	lib.removeHidden( true )
-end
-
--- TODO: This is deprecated.
-lib.removeAll = function()
-	print( "WARNING: composer.removeAll() is deprecated. This now calls through to composer.removeHidden( false ) instead." )
-	lib.removeHidden( false )
-end
 
 lib.removeHidden = function( shouldRecycle )
 	lib.hideOverlay()
@@ -769,12 +748,6 @@ lib.removeHidden = function( shouldRecycle )
 		debug_print( msg )
 	end
 	
-end
-
--- TODO: This is deprecated.
-lib.getPrevious = function()
-	print("WARNING: composer.getPrevious() is deprecated. This now calls through to composer.getSceneName( \"previous\" ) instead.")
-	return lib.getSceneName( "previous" )
 end
 
 -----------------------------------------------------------------------------------------
@@ -830,31 +803,6 @@ end
 lib.getCurrentSceneName = function()
 	print("WARNING: composer.getCurrentSceneName() is deprecated. This now calls through to composer.getSceneName( \"current\" ) instead.")
 	return lib.getSceneName( "current" )
-end
-
------------------------------------------------------------------------------------------
-
--- newScene
--- factory method
--- creates a new scene
-
-lib.newScene = function( sceneName )
-	-- sceneName is optional if they don't want to use external module
-	local s = composerScene:new()	-- TODO: Get real event listener class (we're cheating by using this)
-
-	if sceneName and not lib.loadedScenes[sceneName] then
-		lib.loadedScenes[sceneName] = s
-	end
-	
-	if sceneName then
-		-- replace all '.' with '/'
-		local basename = string.gsub( sceneName, "%.", '/' )
-		-- append file extension
-		local filename = basename .. '.ccscene'
-		s:setComposerSceneName( filename )
-	end
-	
-	return s
 end
 
 -----------------------------------------------------------------------------------------
@@ -1594,11 +1542,6 @@ local function purgeLruScene( event )	-- Lru = "least recently used"
 end
 
 Runtime:addEventListener( "memoryWarning", purgeLruScene )
-
--- TODO: This is deprecated.
-lib.printMemUsage = function()
-	print("WARNING: composer.printMemUsage() has been removed.")
-end
 
 lib.setVariable = function( key, value )
 	if nil ~= key and nil ~= value then
