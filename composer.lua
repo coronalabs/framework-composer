@@ -13,6 +13,9 @@ local Library = require "CoronaLibrary"
 -- the transition object
 local lib = Library:new{ name='composer', publisherId='com.coronalabs', version=2 }
 
+-- the scene class
+local composerScene = require ( "composer_scene" )
+
 -----------------------------------------------------------------------------------------
 
 -- top level group in which the scenes will be inserted
@@ -85,7 +88,7 @@ local effectList = {
 			alphaEnd = 1.0
 		}
 	},
-	
+
 	["zoomOutIn"] =
 	{
 		["from"] =
@@ -109,7 +112,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["zoomOutInFade"] =
 	{
 		["from"] =
@@ -137,7 +140,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["zoomInOut"] =
 	{
 		["from"] =
@@ -161,7 +164,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["zoomInOutFade"] =
 	{
 		["from"] =
@@ -189,7 +192,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["flip"] =
 	{
 		["from"] =
@@ -206,7 +209,7 @@ local effectList = {
 			xEnd = 0
 		}
 	},
-	
+
 	["flipFadeOutIn"] =
 	{
 		["from"] =
@@ -227,7 +230,7 @@ local effectList = {
 			alphaEnd = 1.0
 		}
 	},
-	
+
 	["zoomOutInRotate"] =
 	{
 		["from"] =
@@ -255,7 +258,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["zoomOutInFadeRotate"] =
 	{
 		["from"] =
@@ -287,7 +290,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["zoomInOutRotate"] =
 	{
 		["from"] =
@@ -315,7 +318,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["zoomInOutFadeRotate"] =
 	{
 		["from"] =
@@ -347,7 +350,7 @@ local effectList = {
 		},
 		hideOnOut = true
 	},
-	
+
 	["fromRight"] =
 	{
 		["from"] =
@@ -370,7 +373,7 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["fromLeft"] =
 	{
 		["from"] =
@@ -393,7 +396,7 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["fromTop"] =
 	{
 		["from"] =
@@ -416,7 +419,7 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["fromBottom"] =
 	{
 		["from"] =
@@ -439,7 +442,7 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["slideLeft"] =
 	{
 		["from"] =
@@ -462,7 +465,7 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["slideRight"] =
 	{
 		["from"] =
@@ -485,9 +488,9 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["slideDown"] =
-	{ 
+	{
 		["from"] =
 		{
 			xStart = 0,
@@ -508,7 +511,7 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["slideUp"] =
 	{
 		["from"] =
@@ -531,7 +534,7 @@ local effectList = {
 		concurrent = true,
 		sceneAbove = true
 	},
-	
+
 	["crossFade"] =
 	{
 		["from"] =
@@ -607,7 +610,7 @@ lib._saveSceneAndHide = function( currentScene, newModule, noEffect )
     elseif noEffect and currentScene then
     	currentScene.isVisible = false
     end
-	
+
 	-- Since display.capture() only captures the group as far as content width/height,
 	-- we must make calculations to account for groups that are both less than the total width/height
 	-- of the screen, as well as groups that are offset have elements that are not on the screen:
@@ -619,13 +622,13 @@ lib._saveSceneAndHide = function( currentScene, newModule, noEffect )
 	local objectsOutsideRight = xMax > displayW+(-display.screenOriginX)
 	local objectsAboveTop = yMin < display.screenOriginY
 	local objectsBelowBottom = yMax > displayH+(-display.screenOriginY)
-	
+
 	-- Calculate xMin and xMax
 	if xMin < 0 then xMin = 0; end
 	if xMax > displayW then
 		xMax = displayW
 	end
-	
+
 	-- Caluclate yMin and yMax
 	if yMin < 0 then yMin = 0; end
 	if yMax > displayH then
@@ -635,12 +638,12 @@ lib._saveSceneAndHide = function( currentScene, newModule, noEffect )
 	-- Calculate actual width/height of screen capture
 	local width = xMax - xMin
 	local height = yMax - yMin
-	
+
 	-- loop through current scene and remove potential Runtime table listeners
 	for i=currentScene.numChildren,1,-1 do
 		if currentScene[i].enterFrame then Runtime:removeEventListener( "enterFrame", currentScene[i] ); end
 	end
-	
+
 	-- dispatch current scene's exitScene event
 	if lib._currentModule and lib.loadedScenes[lib._currentModule] then
 		local event = {}
@@ -648,7 +651,7 @@ lib._saveSceneAndHide = function( currentScene, newModule, noEffect )
 		event.phase = "will"
 		lib.loadedScenes[lib._currentModule]:dispatchEvent( event )
 	end
-	
+
 	-- set new currentModule
 	lib._currentModule = newModule
 
@@ -666,7 +669,7 @@ end
 -- creates the touch overlay
 
 lib._createTouchOverlay = function()
-	
+
 	local overlayRect = display.newRect( 0, 0, displayW, displayH )
 	if not isGraphicsV1 then
 		overlayRect.anchorX = 0
@@ -677,7 +680,7 @@ lib._createTouchOverlay = function()
 	overlayRect.isHitTestable = true	-- allow touches when invisible
 	overlayRect:addEventListener( "touch", function() return true end )
 	overlayRect:addEventListener( "tap", function() return true end )
-	
+
 	return overlayRect
 end
 
@@ -696,13 +699,13 @@ end
 lib.removeScene = function( sceneName, shouldRecycle )
 	-- Unload a scene and remove its display group
 	-- NOTE: global reference in composer.scenes is removed, unless shouldRecycle is set to true
-	
+
 	local scene = lib.loadedScenes[sceneName]
 	if scene and scene.view then
 		local event = {}
 		event.name = "destroy"
 		scene:dispatchEvent( event )
-				
+
 		if scene.view then
 			display.remove( scene.view )
 			scene.view = nil
@@ -714,7 +717,7 @@ lib.removeScene = function( sceneName, shouldRecycle )
 			debug_print( sceneName .. "'s view was not purged because it's view (display group) does not exist. This means it has already been purged or the view was never created." )
 		end
 	end
-	
+
 	if not shouldRecycle then
 		-- remove module from scene history table
 		lib._removeFromHistory( sceneName )
@@ -723,7 +726,7 @@ lib.removeScene = function( sceneName, shouldRecycle )
 		-- remove the package reference
 		package.loaded[sceneName] = nil
 	end
-	
+
 end
 
 -----------------------------------------------------------------------------------------
@@ -751,7 +754,7 @@ lib.removeHidden = function( shouldRecycle )
 	-- Purges all scenes (except for the one that is currently showing)
 	for i=#lib.loadedSceneModules,1,-1 do
 		local sceneToUnload = lib.loadedSceneModules[i]
-		
+
 		if sceneToUnload ~= lib._currentModule then
 			purge_count = purge_count + 1
 			lib.removeScene( sceneToUnload, shouldRecycle )
@@ -765,7 +768,7 @@ lib.removeHidden = function( shouldRecycle )
 		end
 		debug_print( msg )
 	end
-	
+
 end
 
 -- TODO: This is deprecated.
@@ -808,13 +811,13 @@ lib.getScene = function( sceneName )
 		local currentSceneName = lib.getCurrentSceneName
 		scene = lib.loadedScenes[ currentSceneName ]
 	else
-		
+
 		scene = lib.loadedScenes[ sceneName ]
 		if lib.isDebug and not scene then
 			debug_print( "getScene: The specified scene, " .. sceneName .. ", does not exist." )
 		end
 	end
-	
+
 	return scene
 end
 
@@ -831,12 +834,37 @@ end
 
 -----------------------------------------------------------------------------------------
 
+-- newScene
+-- factory method
+-- creates a new scene
+
+lib.newScene = function( sceneName )
+	-- sceneName is optional if they don't want to use external module
+	local s = composerScene:new()	-- TODO: Get real event listener class (we're cheating by using this)
+
+	if sceneName and not lib.loadedScenes[sceneName] then
+		lib.loadedScenes[sceneName] = s
+	end
+
+	if sceneName then
+		-- replace all '.' with '/'
+		local basename = string.gsub( sceneName, "%.", '/' )
+		-- append file extension
+		local filename = basename .. '.ccscene'
+		s:setComposerSceneName( filename )
+	end
+
+	return s
+end
+
+-----------------------------------------------------------------------------------------
+
 -- nextTransition
 -- private
 -- creates the transition for the next scene
 
 lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScreenshot, customParams )
-	
+
 	-- remove touch disabling overlay rectangle:
 	local disableOverlay = function()
 		lib._touchOverlay.isHitTestable = false	-- disable touches when invisible
@@ -866,7 +894,7 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 			end
 		end
 	end
-	
+
 
 
 	-- dispatch show event, phase will
@@ -877,7 +905,7 @@ lib._nextTransition = function( sceneGroup, fx, effectTime, touchOverlay, oldScr
 		event.params = customParams
 		lib.loadedScenes[lib._currentModule]:dispatchEvent( event )
 	end
-	
+
 	local options = {}
 	options.x = fx.to.xEnd
 	options.y = fx.to.yEnd
@@ -907,7 +935,7 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 
 	local overlay = lib._currentOverlayScene
 	lib._currentOverlayScene = nil
-	
+
 	if overlay then
 		-- auto-correct if colon syntax was used instead of dot syntax
 		if purgeOnly and purgeOnly == lib then
@@ -938,13 +966,13 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 			event.name = "hide"
 			event.phase = "did"
 			event.sceneName = overlay.name
-			
+
 			-- if the overlay has a parent scene, add event.parent to the dispatched event
 			if lib._currentModule then
 				local currentScene = lib.loadedScenes[ lib._currentModule ]
 				event.parent = currentScene
 			end
-			
+
 			overlay:dispatchEvent( event )
 
 			-- check to see if overlay scene is also being used as a normal scene (in which case we won't remove; only purge)
@@ -966,7 +994,7 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 				event.sceneName = overlay.name
 				current:dispatchEvent( event )
 			end]]--
-			
+
 			overlay = nil
 			lib._touchOverlay.isHitTestable = false -- ensure touches are enabled
 		end
@@ -975,13 +1003,13 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 		event.name = "hide"
 		event.phase = "will"
 		event.sceneName = overlay.name
-		
+
 		-- if the overlay has a parent scene, add event.parent to the dispatched event
 		if lib._currentModule then
 			local currentScene = lib.loadedScenes[ lib._currentModule ]
 			event.parent = currentScene
 		end
-		
+
 		overlay:dispatchEvent( event )
 
 		if effect and effectList[effect] then
@@ -1012,7 +1040,7 @@ lib.hideOverlay = function( purgeOnly, effect, effectTime, argOffset )
 			o.onComplete = overlayTransitionComplete
 			o.generatedBy = "composer"
 
-			local fxTransition = transition.to( overlay.view, o ) 
+			local fxTransition = transition.to( overlay.view, o )
 		else
 			dispatchSceneEvents()
 		end
@@ -1054,7 +1082,7 @@ function lib.showOverlay( sceneName, options, argOffset )
 
 	-- check to see if scene has already been loaded
 	local scene = lib.loadedScenes[sceneName]
-	
+
 	if scene then
 		-- scene exists
 
@@ -1074,22 +1102,22 @@ function lib.showOverlay( sceneName, options, argOffset )
 		if _type(scene) == 'boolean' then
 			error( "Attempting to load scene from invalid scene module (" .. sceneName .. ".lua). Did you forget to return the scene object at the end of the scene module? (e.g. 'return scene')" )
 		end
-		
+
 		-- create the scene's view
 		scene.view = scene.view or display.newGroup()
 		local event = {}
 		event.name = "create"
 		event.params = params
 		event.sceneName = sceneName
-		
+
 		local currentCcFile = scene:getComposerSceneName()
 		if nil ~= currentCcFile and lib._sceneFileExists( currentCcFile ) then
 			scene:load( currentCcFile )
 		end
-		
+
 		lib.loadedScenes[sceneName]:dispatchEvent( event )
 	end
-	
+
 	-- assign the scene name and the scene object to library variables
 	lib._currentOverlayScene = scene
 	lib._currentOverlayScene.name = sceneName
@@ -1100,13 +1128,13 @@ function lib.showOverlay( sceneName, options, argOffset )
 	event.phase = "will"
 	event.params = params
 	event.sceneName = sceneName
-	
+
 	-- if the overlay has a parent scene, add event.parent to the dispatched event
 	if lib._currentModule then
 		local currentScene = lib.loadedScenes[ lib._currentModule ]
 		event.parent = currentScene
 	end
-	
+
 	scene:dispatchEvent( event )
 
 	local function dispatchSceneEvents()
@@ -1116,13 +1144,13 @@ function lib.showOverlay( sceneName, options, argOffset )
 		event.phase = "did"
 		event.params = params
 		event.sceneName = sceneName
-		
+
 		-- if the overlay has a parent scene, add event.parent to the dispatched event
 		if lib._currentModule then
 			local currentScene = lib.loadedScenes[ lib._currentModule ]
 			event.parent = currentScene
 		end
-		
+
 		scene:dispatchEvent( event )
 
 		-- dispatch "overlayBegan" event to current scene
@@ -1187,7 +1215,7 @@ function lib.showOverlay( sceneName, options, argOffset )
 		lib._modalRect.y = display.contentCenterY
 		lib._modalRect.isVisible = false
 		lib._modalRect.isHitTestable = true
-		-- prevent touches 
+		-- prevent touches
 		lib._modalRect.touch = function() return true; end
 		lib._modalRect.tap = function() return true; end
 		lib._modalRect:addEventListener( "touch", function() return true end )
@@ -1221,7 +1249,7 @@ function lib.loadScene( sceneName, doNotLoadView, params )
 	if doNotLoadView ~= nil and _type(doNotLoadView) ~= "boolean" then
 		params = doNotLoadView
 	end
-	
+
 	if scene then
 		-- scene exists
 
@@ -1237,7 +1265,7 @@ function lib.loadScene( sceneName, doNotLoadView, params )
 	else
 		lib.loadedScenes[sceneName] = require( sceneName )
 		scene = lib.loadedScenes[sceneName]
-		
+
 		-- scene's view will be created (default), unless user explicity
 		-- tells it not to by setting doNotLoadView to true
 		if not doNotLoadView then
@@ -1276,7 +1304,7 @@ function lib.gotoScene( ... )
     --
 
    	lib.hideOverlay()	-- hide any overlay that may be currently showing
-	
+
 	-- parse arguments
 	local arg = {...}
 	local argOffset = 0
@@ -1289,7 +1317,7 @@ function lib.gotoScene( ... )
 			debug_print( "WARNING: You should use dot-syntax when calling composer functions. For example, composer.gotoScene() instead of composer:gotoScene()." )
 		end
 	end
-	
+
 	if arg and _type(arg[1+argOffset]) == "boolean" then
 		argOffset = argOffset + 1	-- showActivityIndicator parameter has been deprecated; users should control this on their own
 	end
@@ -1306,30 +1334,30 @@ function lib.gotoScene( ... )
 		effect = arg[2+argOffset]
 		effectTime = _tonumber(arg[3+argOffset])
 	end
-	
+
 	-- If there is no effect defined make one happen anyway (un-noticable visually but gives roughly a 1ms delay so runtime listeners don't overlap)
 	if not effect then
 		effect = "crossFade"
 		effectTime = 0
 	end
-	
+
 	----- end parse args
-	
+
 	-- create a reference to current module
 	if not lib._currentModule then
 		lib._currentModule = newScene
-		
+
 	elseif lib._currentModule == newScene then
 		-- if the scene is the same with the one we have on screen
-	
+
 		if not lib._currentModule then
 			return
 		end
-		
+
 		lib.hideOverlay()	-- hide any overlay/popup scenes that may be showing
 
 		local scene = lib.getScene( lib._currentModule )
-		
+
 		if not scene then
 			-- no scene exists, we create it
 			local success, msg = pcall( function() lib.loadedScenes[newScene] = require( newScene ) end )
@@ -1343,8 +1371,8 @@ function lib.gotoScene( ... )
 			if _type(scene) == 'boolean' then
 				error( "Attempting to load scene from invalid scene module (" .. sceneName .. ".lua). Did you forget to return the scene object at the end of the scene module? (e.g. 'return scene')" )
 			end
-		end		
-		
+		end
+
 		if options and options.recreate == true then
 			lib.removeScene(lib._currentModule, true)
 		end
@@ -1363,7 +1391,7 @@ function lib.gotoScene( ... )
 		end
 
 		local function dispatch_createScene()
-			
+
 			if not scene.view then
 				scene.view = display.newGroup()
 				scene:dispatchEvent( { name="create", params = params } )
@@ -1383,13 +1411,13 @@ function lib.gotoScene( ... )
 		next_render( dispatch_didExitScene )
 
 		-- end if the scene is the same with the one we have on screen
-		
+
 		return
-		
+
 	elseif lib._currentModule then
 		lib._previousScene = lib._currentModule
 	end
-	
+
 	local fx = effectList[effect] or {}
 	local noEffect = not effect
 	local screenshot = lib._saveSceneAndHide( lib._currentScene, newScene, noEffect )	-- save screenshot, remove current scene, show scene capture
@@ -1398,18 +1426,18 @@ function lib.gotoScene( ... )
 	else
 		lib._touchOverlay.isHitTestable = true	-- allow touches when invisible
 	end
-	
+
 	-- load the scene (first check if scene has already been loaded)
 	local scene = lib.loadedScenes[newScene]
-	
+
 	-- Create the specified scene and view group if necessary. Then set the
 	-- currentScene variable to specified scene (to be transitioned to)
-	
+
 	if scene then
 		if not scene.view then
 			-- if view does not exist, create it and re-dispatch "createScene" event
 			scene.view = display.newGroup()
-			
+
 			local currentCcFile = scene:getComposerSceneName()
 			if nil ~= currentCcFile and lib._sceneFileExists( currentCcFile ) then
 				scene:load( currentCcFile )
@@ -1434,7 +1462,7 @@ function lib.gotoScene( ... )
 		end
 		scene.view = scene.view or display.newGroup()
 		lib._currentScene = scene.view
-		
+
 		local event = {}
 		event.name = "create"
 		event.params = params
@@ -1445,7 +1473,7 @@ function lib.gotoScene( ... )
 		end
 		lib.loadedScenes[newScene]:dispatchEvent( event )
 	end
-	
+
 	-- Set initial values for scene that will be transitioned into (and other relevant elements, such as touchOverlay)
 	if fx.sceneAbove then
 		stage:insert( lib._currentScene )
@@ -1465,12 +1493,12 @@ function lib.gotoScene( ... )
     	lib._currentScene.yScale = fx.to.yScaleStart or 1.0
     	lib._currentScene.rotation = fx.to.rotationStart or 0
     end
-	
+
 	-- onComplete listener for first transition (previous scene; screenshot)
-	local transitionNewScene = function() 
+	local transitionNewScene = function()
 		lib._nextTransition( lib._currentScene, fx, effectTime, lib._touchOverlay, screenshot, params )
 	end
-	
+
 	-- transition the previous scene out (the screenshot):
 	if effect then
 		-- create transition options table (for the scene that's on the way out)
@@ -1489,7 +1517,7 @@ function lib.gotoScene( ... )
 
 		-- for effects where both scenes should transition concurrently, remove onComplete listener
 		if fx.concurrent then options.onComplete = nil; end
-		
+
 		-- begin scene transitions
 		if screenshot then
 			if not fx.concurrent and options.onComplete then
@@ -1511,7 +1539,7 @@ function lib.gotoScene( ... )
 		lib._touchOverlay.isHitTestable = false
 		lib._currentScene.isVisible = true
 		lib._currentScene.x, lib._currentScene.y = 0, 0
-		
+
 		-- dispatch previous scene's didExitScene event
 		local previous = lib.getPreviousSceneName()
 		if previous and lib.loadedScenes[previous] then
@@ -1535,7 +1563,7 @@ function lib.gotoScene( ... )
 			event.phase = "did"
 			event.params = params
 			lib.loadedScenes[lib._currentModule]:dispatchEvent( event )
-			
+
 
 			if lib.recycleOnSceneChange then
 				lib.removeHidden(lib.recycleOnSceneChange)
@@ -1550,7 +1578,7 @@ end
 local function purgeLruScene( event )	-- Lru = "least recently used"
 	if lib.recycleOnLowMemory then
 		local lruScene = lib.loadedSceneModules[1]
-		
+
 		-- ensure the "lruScene" is not the currently loaded scene
 		-- also ensure that there are at least 2 scenes left (to prevent
 		-- currently transitioning-out scene from being purged)
@@ -1589,18 +1617,18 @@ lib._sceneFileExists = function( fileName )
 	local fileExists = false
 
 	local path = system.pathForFile( fileName, system.ResourceDirectory )
-	
+
 	if path then
-	
+
 		local testHandler = io.open( path )
-	
+
 		if testHandler then
 		   fileExists = true
 		   testHandler:close()
 		end
-	
+
 	end
-	
+
 	return fileExists
 end
 
