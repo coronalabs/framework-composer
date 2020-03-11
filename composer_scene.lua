@@ -14,8 +14,8 @@ local Super = Runtime._super
 local Scene = Super:new()
 
 -- libraries we need (lazy loaded)
-local physics
 local json
+local physics
 
 local function print_r(object, mesg)
 	if mesg then
@@ -44,7 +44,6 @@ function Scene:initialize()
 	self.view = Super.view
 	self._objects = {}
 	self._hasPhysics = false
-	physics = physics or require( "physics" )
 end
 
 function Scene:setComposerSceneName( file )
@@ -78,28 +77,28 @@ local function _newGroup( params )
 	if params.tag then
 		group.tag = params.tag
 	end
-
+	
 	return group
 end
 
 local function getGroupByTag ( group, groupTag )
-
+	
 	local returnGroup
-
+	
 	for i = 1, group.numChildren do
-
+		
 		local child = group[ i ]
-
+		
 		-- if we have a tag, return it
 		if groupTag == child.tag then
 			returnGroup = child
 		end
-
+		
 		if child.numChildren and child.numChildren > 0 then
 			getGroupByTag( child, groupTag )
 		end
 	end
-
+	
 	return returnGroup
 
 end
@@ -107,20 +106,20 @@ end
 
 -- create a image
 local function _newImage( params )
-
+	
 	local methodArgs = {}
-
+	
 	if params.parentGroup then
 		local group = getGroupByTag( display.getCurrentStage(), params.parentGroup )
 		if group then
 			table.insert ( methodArgs, group )
 		end
 	end
-
+	
 	if params.baseDir then
 		table.insert( methodArgs, params.baseDir )
 	end
-
+	
 	if params.imageFile then
 		table.insert( methodArgs, params.imageFile )
 	end
@@ -128,20 +127,20 @@ local function _newImage( params )
 	if params.x then
 		table.insert( methodArgs, params.x )
 	end
-
+	
 	if params.y then
 		table.insert( methodArgs, params.y )
 	end
-
+	
 	table.insert( methodArgs, true )
-
+	
 	newImage = display.newImage( unpack( methodArgs ) )
-
+	
 --	if params.physicsEnabled then
 --		newImage.width = newImage.width * params.xScale
 --		newImage.height = newImage.height * params.yScale
 --	end
-
+	
 	if params.strokeColor then
 		--[[
 		local strokeTable = {}
@@ -152,20 +151,20 @@ local function _newImage( params )
 		--]]
 		newImage:setStrokeColor( unpack_color(params.strokeColor) )
 	end
-
+	
 	if params.strokeWidth then
 		newImage.strokeWidth = params.strokeWidth
 	end
 
 	return newImage
-
+	
 end
 
 -- create a rectangle
 local function _newRect ( params )
-
+	
 	local methodArgs = {}
-
+	
 	if params.parentGroup then
 		local group = newDisplay.getGroupByTag( display.getCurrentStage(), params.parentGroup )
 		if group then
@@ -176,7 +175,7 @@ local function _newRect ( params )
 	if params.x then
 		table.insert( methodArgs, params.x )
 	end
-
+	
 	if params.y then
 		table.insert( methodArgs, params.y )
 	end
@@ -184,13 +183,13 @@ local function _newRect ( params )
 	if params.rectWidth then
 		table.insert( methodArgs, params.rectWidth )
 	end
-
+	
 	if params.rectHeight then
 		table.insert( methodArgs, params.rectHeight )
 	end
-
+	
 	local newRect = display.newRect( unpack ( methodArgs ) )
-
+	
 	if params.fillColor then
 		--[[
 		local fillTable = {}
@@ -201,7 +200,7 @@ local function _newRect ( params )
 		--]]
 		newRect:setFillColor( unpack_color(params.fillColor) )
 	end
-
+	
 	if params.strokeColor then
 		--[[
 		local strokeTable = {}
@@ -212,20 +211,20 @@ local function _newRect ( params )
 		--]]
 		newRect:setStrokeColor( unpack_color(params.strokeColor) )
 	end
-
+	
 	if params.strokeWidth then
 		newRect.strokeWidth = params.strokeWidth
 	end
-
+	
 	return newRect
-
+	
 end
 
 -- create a circle
 local function _newCircle ( params )
-
+	
 	local methodArgs = {}
-
+	
 	if params.parentGroup then
 		local group = newDisplay.getGroupByTag( display.getCurrentStage(), params.parentGroup )
 		if group then
@@ -236,7 +235,7 @@ local function _newCircle ( params )
 	if params.x then
 		table.insert( methodArgs, params.x )
 	end
-
+	
 	if params.y then
 		table.insert( methodArgs, params.y )
 	end
@@ -244,9 +243,9 @@ local function _newCircle ( params )
 	if params.circleRadius then
 		table.insert( methodArgs, params.circleRadius )
 	end
-
+	
 	local newCircle = display.newCircle( unpack ( methodArgs ) )
-
+	
 	--newCircle.width = newCircle.width * params.xScale
 	--newCircle.height = newCircle.height * params.yScale
 	newCircle.width = newCircle.width
@@ -262,7 +261,7 @@ local function _newCircle ( params )
 		--]]
 		newCircle:setFillColor( unpack_color(params.fillColor) )
 	end
-
+	
 	if params.strokeColor then
 		--[[
 		local strokeTable = {}
@@ -273,20 +272,20 @@ local function _newCircle ( params )
 		--]]
 		newCircle:setStrokeColor( unpack_color(params.strokeColor) )
 	end
-
+	
 	if params.strokeWidth then
 		newCircle.strokeWidth = params.strokeWidth
 	end
-
+	
 	return newCircle
-
+	
 end
 
 -- create a line
 local function _newLine ( params )
-
+	
 	local methodArgs = {}
-
+	
 	if params.parentGroup then
 		local group = newDisplay.getGroupByTag( display.getCurrentStage(), params.parentGroup )
 		if group then
@@ -297,7 +296,7 @@ local function _newLine ( params )
 	if params.x1 then
 		table.insert( methodArgs, params.x1 )
 	end
-
+	
 	if params.y1 then
 		table.insert( methodArgs, params.y1 )
 	end
@@ -305,33 +304,33 @@ local function _newLine ( params )
 	if params.x2 then
 		table.insert( methodArgs, params.x2 )
 	end
-
+	
 	if params.y2 then
 		table.insert( methodArgs, params.y2 )
 	end
-
+	
 	local newLine = display.newLine( params.x1, params.y1, params.x2, params.y2 )
 
 	if params.lineColor then
 		newLine:setStrokeColor( unpack_color(params.lineColor) )
 	end
-
+	
 	if params.lineWidth then
 		newLine.strokeWidth = params.lineWidth
 	end
-
+	
 	newLine.x = params.x
 	newLine.y = params.y
-
+	
 	return newLine
-
+	
 end
 
 -- create a text
 local function _newText ( params )
-
+	
 	local methodArgs = {}
-
+	
 	if params.parentGroup then
 		local group = newDisplay.getGroupByTag( display.getCurrentStage(), params.parentGroup )
 		if group then
@@ -342,11 +341,11 @@ local function _newText ( params )
 	if params.text then
 		table.insert( methodArgs, params.text )
 	end
-
+	
 	if params.x then
 		table.insert( methodArgs, params.x )
 	end
-
+	
 	if params.y then
 		table.insert( methodArgs, params.y )
 	end
@@ -367,10 +366,10 @@ local function _newText ( params )
 	if params.size then
 		table.insert( methodArgs, params.size )
 	end
-
+	
 	-- We could also just pass "params" to newText() (almost)
 	local newText = display.newText( unpack ( methodArgs ) )
-
+	
 	if params.textColor then
 		--[[
 		local colorTable = {}
@@ -381,34 +380,34 @@ local function _newText ( params )
 		-- there seems to be a disagreement about the limit
 		newText:setFillColor( unpack_color(params.textColor) )
 	end
-
+	
 	if params.physicsEnabled then
 		if params.xScale then
 			--newText.xScale = params.xScale
 		end
-
+		
 		if params.yScale then
 			--newText.yScale = params.yScale
 		end
 	end
-
+	
 	if params.width then
 		newText.width = params.width
 	end
-
+	
 	return newText
-
+	
 end
 
 -- transition handling
 function Scene:computeTransitions( object, transitionTable )
-
+		
 	local function createTransitionParams( object, objectModel )
 
 		if not object.isVisible then
 			return
 		end
-
+	
 		if objectModel then
 			local timeline = objectModel
 
@@ -423,7 +422,7 @@ function Scene:computeTransitions( object, transitionTable )
 			end
 
 			table.sort(tranTable, compare)
-
+			
 			local copyTable = tranTable
 
 			-- if we have at least a keyframe
@@ -456,9 +455,9 @@ function Scene:computeTransitions( object, transitionTable )
 			end
 		end
 	end
-
+	
 	createTransitionParams( object, transitionTable )
-
+	
 end
 
 function Scene:newObject ( params )
@@ -466,8 +465,8 @@ function Scene:newObject ( params )
 	local factoryMethods = {
 		image = _newImage,
 		rect = _newRect,
-		circle = _newCircle,
-		line = _newLine,
+		circle = _newCircle, 
+		line = _newLine, 
 		text = _newText,
 		group = _newGroup
 	}
@@ -479,9 +478,9 @@ function Scene:newObject ( params )
 	if nil ~= factory then
 		returnedObject = factory( params )
 	end
-
+	
 	return returnedObject
-
+	
 end
 
 local function dragBody ( event, params )
@@ -510,31 +509,31 @@ local function dragBody ( event, params )
 				-- Internal default is (1000 * mass), so set this fairly high if setting manually
 				body.tempJoint.maxForce = params.maxForce
 			end
-
+			
 			if params.frequency then
 				-- This is the response speed of the elastic joint: higher numbers = less lag/bounce
 				body.tempJoint.frequency = params.frequency
 			end
-
+			
 			if params.dampingRatio then
 				-- Possible values: 0 (no damping) to 1.0 (critical damping)
 				body.tempJoint.dampingRatio = params.dampingRatio
 			end
 		end
-
+	
 	elseif body.isFocus then
 		if "moved" == phase then
-
+		
 			-- Update the joint to track the touch
 			body.tempJoint:setTarget( event.x, event.y )
 
 		elseif "ended" == phase or "cancelled" == phase then
 			stage:setFocus( body, nil )
 			body.isFocus = false
-
-			-- Remove the joint when the touch ends
+			
+			-- Remove the joint when the touch ends			
 			body.tempJoint:removeSelf()
-
+			
 		end
 	end
 
@@ -547,13 +546,14 @@ end
 function Scene:loadFile ( filename )
     -- set default base dir if none specified
     local base = system.ResourceDirectory
-
+    json = json or require( "json" )
+ 
     -- create a file path for corona i/o
     local path = system.pathForFile( filename, base )
-
+ 
     -- will hold contents of file
     local contents
-
+ 
     -- io.open opens a file at path. returns nil if no file found
     local file = io.open( path, "r" )
     if file then
@@ -570,16 +570,16 @@ function Scene:loadFile ( filename )
 end
 
 function Scene:startPhysics()
-	local physics = physics or require "physics"
+	physics = physics or require( "physics" )
 	physics.stop()
 	physics.start()
 end
 
 
 function Scene:createObject( objData )
-
+	physics = physics or require( "physics" )
 	local v = objData
-
+	
 	if not v.type then
 		v.type = "image"
 	end
@@ -592,7 +592,7 @@ function Scene:createObject( objData )
 			background:setFillColor( v.bgColor.r, v.bgColor.g, v.bgColor.b, v.bgColor.a )
 		end
 		background:toBack()
-
+		
 		-- global physics properties
         if v.xGravity and v.yGravity then
         	if not self._hasPhysics then
@@ -601,7 +601,7 @@ function Scene:createObject( objData )
             end
             physics.setGravity( tonumber( v.xGravity ), tonumber( v.yGravity ) )
         end
-
+		
 	else
 
 		local object = self:newObject( v )
@@ -614,39 +614,39 @@ function Scene:createObject( objData )
 				object.x = v.x
 				object.y = v.y
 			end
-
+	
 			-- rotation
 			if v.rotation then
 				object.rotation = v.rotation
 			end
-
+	
 			-- tint color
 			if v.bgColor and v.type ~= "group" then
 				object:setFillColor( unpack_color( v.bgColor ) )
 			end
-
+			
 			-- tint color for image objects
 			if v.fillColor and v.fillColor.r and v.fillColor.g and v.fillColor.b then
 				object:setFillColor( v.fillColor.r, v.fillColor.g, v.fillColor.b )
 			end
-
+		
 			if v.alpha then
 				object.alpha = v.alpha
 			end
-
+			
 			if v.fillEffect then
 				object.fill.effect = v.fillEffect
 			end
-
+		
 			-- mirrors code in CCSceneMethods.lua
 			if v.physicsEnabled then
-
+				
 				-- if at least one object has physics enabled, we enable physics
 				if not self._hasPhysics then
 					self._hasPhysics = true
 					physics.start()
 				end
-
+			
 				local bodyShape, radius
 				if v.radius and v.radius ~= 0 then
 					radius = v.radius
@@ -660,91 +660,89 @@ function Scene:createObject( objData )
 					end
 				end
 				physics.addBody( object, v.bodyType, { bounce=v.bounce, density=v.density, friction=v.friction, shape=bodyShape, radius=radius } )
+				
 
-
-
+				
 				if v.hasJoint == true then
 					object:addEventListener( "touch", dragBody )
 				end
-
+				
 				--further physics properties
 				if v.isSensor then
 					object.isSensor = v.isSensor
 				end
-
+				
 				if v.isBullet then
 					object.isBullet = v.isBullet
 				end
 
 				if v.isFixedRotation then
 					object.isFixedRotation = v.isFixedRotation
-				end
+				end				
+
+				if v.isBodyActive then
+					object.isBodyActive = v.isBodyActive
+				end	
 
 				if v.isBodyActive then
 					object.isBodyActive = v.isBodyActive
 				end
-
-				if v.isBodyActive then
-					object.isBodyActive = v.isBodyActive
-				end
-
+				
 				if v.linearDamping then
 					object.linearDamping = v.linearDamping
-				end
+				end	
 
 				if v.angularDamping then
 					object.angularDamping = v.angularDamping
-				end
+				end	
 
 				if v.isSleepingAllowed then
 					object.isSleepingAllowed = v.isSleepingAllowed
-				end
+				end					
 
 				if v.isAwake then
 					object.isAwake = v.isAwake
-				end
-
+				end	
+				
 			end
-
+		
 			object.isVisible = v.isVisible
-
+		
 			object.id = v.id
 			object.tag = v.tag
-
+			
 			if v.isImage and v.width or v.height then
 				if v.width then
 					object.width = v.width
 				end
-
+				
 				if v.height then
 					object.height = v.height
 				end
 			end
-
+			
 			if v.xScale then
 				object.xScale = v.xScale
 			end
-
+			
 			if v.yScale then
 				object.yScale = v.yScale
 			end
 
 			table.insert( self._objects, object )
 			return object
-
+			
 		end
-
+	
 	end
+	
 
-
-
+	
 end
 
 function Scene:load( fileName )
 	self._objects = {}
 	self._hasPhysics = false
-
-	json = json or require("json")
 
 	local objects = self:loadFile( fileName )
 	local root = objects["objects"]
@@ -755,7 +753,7 @@ function Scene:load( fileName )
 
 	-- then all the objects
 	local function showObjects( group, parentGroup )
-
+		
 		for i = 1, #group do
 			local objData = root[ group[ i ] ]
 			local obj = self:createObject( objData )
@@ -766,7 +764,7 @@ function Scene:load( fileName )
 		end
 
 	end
-
+	
 	showObjects( root.id1.children, self.view )
 end
 
