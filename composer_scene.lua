@@ -13,8 +13,9 @@ local Super = Runtime._super
 -- the scene object
 local Scene = Super:new()
 
--- libraries we need (lazily loaded only if user uses deprecated functions)
-local physics, json, librariesLoaded
+-- libraries we need (lazy loaded)
+local physics
+local json
 
 local function print_r(object, mesg)
 	if mesg then
@@ -43,11 +44,7 @@ function Scene:initialize()
 	self.view = Super.view
 	self._objects = {}
 	self._hasPhysics = false
-	if not librariesLoaded then
-		librariesLoaded = true
-		json = json or require("json")
-		physics = physics or require( "physics" )
-	end
+	physics = physics or require( "physics" )
 end
 
 function Scene:setComposerSceneName( file )
@@ -747,11 +744,7 @@ function Scene:load( fileName )
 	self._objects = {}
 	self._hasPhysics = false
 
-	if not librariesLoaded then
-		librariesLoaded = true
-		json = json or require("json")
-		physics = physics or require( "physics" )
-	end
+	json = json or require("json")
 
 	local objects = self:loadFile( fileName )
 	local root = objects["objects"]
