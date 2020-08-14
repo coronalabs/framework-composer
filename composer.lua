@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------------------------
 --
--- Corona Labs
+-- Corona Labs & others
 --
 -- composer.lua
 --
--- Code is MIT licensed; see https://www.coronalabs.com/links/code/license
+-- Code is MIT licensed; see https://github.com/coronalabs/corona/blob/master/LICENSE.md
 --
 -----------------------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ local Library = require "CoronaLibrary"
 local lib = Library:new{ name='composer', publisherId='com.coronalabs', version=2 }
 
 -- the scene class
-local composerScene = require ( "composer_scene" )
+local composerScene
 
 -----------------------------------------------------------------------------------------
 
@@ -53,6 +53,7 @@ lib.variables = {}
 lib.stage = stage 	-- allows external access to composer's display group
 lib.recycleOnLowMemory = true -- if false, no scenes will auto-purge on low memory
 lib.recycleOnSceneChange = false -- if true, will automatically purge non-active scenes on scene change
+lib.loadComposerGUI = true -- if false, "composer_scene.lua" won't be loaded (contains deprecated code for Composer GUI)
 lib.isDebug = false	-- if true, will print useful info to the terminal in some situations
 lib.debugPrefix = "COMPOSER: "
 
@@ -60,498 +61,523 @@ lib.debugPrefix = "COMPOSER: "
 local _tonumber = tonumber
 local _pairs = pairs
 local _toString = tostring
-local _stringSub = string.sub
-local _stringFind = string.find
 local _type = type
-local _stringFormat = string.format
-local _getInfo = system.getInfo
-local displayW = display.contentWidth
-local displayH = display.contentHeight
 local isGraphicsV1 = ( 1 == display.getDefault( "graphicsCompatibility" ) )
+local maxWidth = math.max( display.actualContentWidth, display.actualContentHeight )*2
 
 -----------------------------------------------------------------------------------------
 
 -- TRANSITION EFFECTS
-
-local effectList = {
-	["fade"] =
-	{
-		["from"] =
+local effectList, isTrackingOrientation
+local function updateEffects()
+	local xCenter, yCenter = display.contentCenterX, display.contentCenterY
+	local width, height = display.actualContentWidth, display.actualContentHeight
+	local outQuad = easing.outQuad
+	
+	local effects = {
+		["fade"] =
 		{
-			alphaStart = 1.0,
-			alphaEnd = 0,
+			["from"] =
+			{
+				alphaStart = 1.0,
+				alphaEnd = 0,
+			},
+		
+			["to"] =
+			{
+				alphaStart = 0,
+				alphaEnd = 1.0
+			}
 		},
-
-		["to"] =
+		
+		["zoomOutIn"] =
 		{
-			alphaStart = 0,
-			alphaEnd = 1.0
+			["from"] =
+			{
+				xEnd = xCenter,
+				yEnd = yCenter,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = xCenter,
+				yStart = yCenter,
+				xEnd = 0,
+				yEnd = 0
+			},
+			hideOnOut = true
+		},
+		
+		["zoomOutInFade"] =
+		{
+			["from"] =
+			{
+				xEnd = xCenter,
+				yEnd = yCenter,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = xCenter,
+				yStart = yCenter,
+				xEnd = 0,
+				yEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+		
+		["zoomInOut"] =
+		{
+			["from"] =
+			{
+				xEnd = -xCenter,
+				yEnd = -yCenter,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = -xCenter,
+				yStart = -yCenter,
+				xEnd = 0,
+				yEnd = 0
+			},
+			hideOnOut = true
+		},
+		
+		["zoomInOutFade"] =
+		{
+			["from"] =
+			{
+				xEnd = -xCenter,
+				yEnd = -yCenter,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = -xCenter,
+				yStart = -yCenter,
+				xEnd = 0,
+				yEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+		
+		["flip"] =
+		{
+			["from"] =
+			{
+				xEnd = xCenter,
+				xScaleEnd = 0.001
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				xStart = xCenter,
+				xEnd = 0
+			}
+		},
+		
+		["flipFadeOutIn"] =
+		{
+			["from"] =
+			{
+				xEnd = xCenter,
+				xScaleEnd = 0.001,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				xStart = xCenter,
+				xEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			}
+		},
+		
+		["zoomOutInRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = xCenter,
+				yEnd = yCenter,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001,
+				rotationStart = 0,
+				rotationEnd = -360
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = xCenter,
+				yStart = yCenter,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0
+			},
+			hideOnOut = true
+		},
+		
+		["zoomOutInFadeRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = xCenter,
+				yEnd = yCenter,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001,
+				rotationStart = 0,
+				rotationEnd = -360,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = xCenter,
+				yStart = yCenter,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+		
+		["zoomInOutRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = xCenter,
+				yEnd = yCenter,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0,
+				rotationStart = 0,
+				rotationEnd = -360
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = xCenter,
+				yStart = yCenter,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0
+			},
+			hideOnOut = true
+		},
+		
+		["zoomInOutFadeRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = xCenter,
+				yEnd = yCenter,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0,
+				rotationStart = 0,
+				rotationEnd = -360,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+		
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = xCenter,
+				yStart = yCenter,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+		
+		["fromRight"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = width,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["fromLeft"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = -width,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["fromTop"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = 0,
+				yStart = -height,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["fromBottom"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = 0,
+				yStart = height,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["slideLeft"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = -width,
+				yEnd = 0,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = width,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["slideRight"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = width,
+				yEnd = 0,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = -width,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["slideDown"] =
+		{ 
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = height,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = 0,
+				yStart = -height,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["slideUp"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = -height,
+				transition = outQuad
+			},
+		
+			["to"] =
+			{
+				xStart = 0,
+				yStart = height,
+				xEnd = 0,
+				yEnd = 0,
+				transition = outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+		
+		["crossFade"] =
+		{
+			["from"] =
+			{
+				alphaStart = 1.0,
+				alphaEnd = 0,
+			},
+		
+			["to"] =
+			{
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			concurrent = true
 		}
-	},
-	
-	["zoomOutIn"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomOutInFade"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOut"] =
-	{
-		["from"] =
-		{
-			xEnd = -displayW*0.5,
-			yEnd = -displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = -displayW*0.5,
-			yStart = -displayH*0.5,
-			xEnd = 0,
-			yEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOutFade"] =
-	{
-		["from"] =
-		{
-			xEnd = -displayW*0.5,
-			yEnd = -displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = -displayW*0.5,
-			yStart = -displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["flip"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			xScaleEnd = 0.001
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			xEnd = 0
-		}
-	},
-	
-	["flipFadeOutIn"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			xScaleEnd = 0.001,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			xEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		}
-	},
-	
-	["zoomOutInRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001,
-			rotationStart = 0,
-			rotationEnd = -360
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomOutInFadeRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001,
-			rotationStart = 0,
-			rotationEnd = -360,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOutRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0,
-			rotationStart = 0,
-			rotationEnd = -360
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOutFadeRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0,
-			rotationStart = 0,
-			rotationEnd = -360,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["fromRight"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["fromLeft"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = -displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["fromTop"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = -displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["fromBottom"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideLeft"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = -displayW,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideRight"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = displayW,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = -displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideDown"] =
-	{ 
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = displayH,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = -displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideUp"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = -displayH,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["crossFade"] =
-	{
-		["from"] =
-		{
-			alphaStart = 1.0,
-			alphaEnd = 0,
-		},
-
-		["to"] =
-		{
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		concurrent = true
 	}
-}
-lib.effectList = effectList
+    -- Reset the effectList.
+	effectList = {}
+    lib.effectList = nil
+    -- And copy the updated effects to the emptied list.
+	for effect, content in _pairs(effects) do
+		effectList[effect] = {}
+		for index, entry in _pairs(content) do
+			if _type(entry) == "table" then
+				effectList[effect][index] = {}
+				for i, j in _pairs(entry) do
+					effectList[effect][index][i] = j
+				end
+			else
+				effectList[effect][index] = entry
+			end
+		end
+	end 
+	lib.effectList = effectList
+end
+updateEffects() -- Obtain the initial effectList.
+
+-----------------------------------------------------------------------------------------
+
+local function onOrientationChange( event )
+	updateEffects()
+end
 
 -----------------------------------------------------------------------------------------
 
@@ -605,39 +631,10 @@ lib._saveSceneAndHide = function( currentScene, newModule, noEffect )
 	if not currentScene then return; end
     local screenshot
     if currentScene and currentScene.numChildren and currentScene.numChildren > 0 and not noEffect then
-        --screenshot = display.capture( currentScene )
         screenshot = currentScene
     elseif noEffect and currentScene then
     	currentScene.isVisible = false
     end
-	
-	-- Since display.capture() only captures the group as far as content width/height,
-	-- we must make calculations to account for groups that are both less than the total width/height
-	-- of the screen, as well as groups that are offset have elements that are not on the screen:
-	local bounds = currentScene.contentBounds
-	local xMin, xMax = bounds.xMin, bounds.xMax
-	local yMin, yMax = bounds.yMin, bounds.yMax
-
-	local objectsOutsideLeft = xMin < display.screenOriginX
-	local objectsOutsideRight = xMax > displayW+(-display.screenOriginX)
-	local objectsAboveTop = yMin < display.screenOriginY
-	local objectsBelowBottom = yMax > displayH+(-display.screenOriginY)
-	
-	-- Calculate xMin and xMax
-	if xMin < 0 then xMin = 0; end
-	if xMax > displayW then
-		xMax = displayW
-	end
-	
-	-- Caluclate yMin and yMax
-	if yMin < 0 then yMin = 0; end
-	if yMax > displayH then
-		yMax = displayH
-	end
-
-	-- Calculate actual width/height of screen capture
-	local width = xMax - xMin
-	local height = yMax - yMin
 	
 	-- loop through current scene and remove potential Runtime table listeners
 	for i=currentScene.numChildren,1,-1 do
@@ -669,13 +666,12 @@ end
 -- creates the touch overlay
 
 lib._createTouchOverlay = function()
-	
-	local overlayRect = display.newRect( 0, 0, displayW, displayH )
+	-- Create a large enough overlay that it will block the screen even if it rotates.
+	local overlayRect = display.newRect( display.screenOriginX, display.screenOriginY, maxWidth, maxWidth )
 	if not isGraphicsV1 then
 		overlayRect.anchorX = 0
 		overlayRect.anchorY = 0
 	end
-	overlayRect:setFillColor( 0 )
 	overlayRect.isVisible = false
 	overlayRect.isHitTestable = true	-- allow touches when invisible
 	overlayRect:addEventListener( "touch", function() return true end )
@@ -840,6 +836,19 @@ end
 
 lib.newScene = function( sceneName )
 	-- sceneName is optional if they don't want to use external module
+    if not composerScene then
+        if lib.loadComposerGUI then -- Deprecated (default): load "composer_scene", which contains abandoned Composer GUI Beta functionality.
+            composerScene = require ( "composer_scene" )
+        else -- Or setup the scene class and add only the required functions, don't load any non-functional GUI related code.
+            composerScene = Runtime._super:new()
+            function composerScene:setComposerSceneName( file )
+            	self._composerFileName = file
+            end
+            function composerScene:getComposerSceneName()
+            	return self._composerFileName
+            end
+        end
+    end
 	local s = composerScene:new()	-- TODO: Get real event listener class (we're cheating by using this)
 
 	if sceneName and not lib.loadedScenes[sceneName] then
@@ -1210,14 +1219,11 @@ function lib.showOverlay( sceneName, options, argOffset )
 	end
 
 	if isModal then
-		lib._modalRect = display.newRect( 0, 0, display.actualContentWidth * 1.25, display.actualContentHeight * 1.25 )
-		lib._modalRect.x = display.contentCenterX
-		lib._modalRect.y = display.contentCenterY
+		-- Create a large enough modal background that it will block the screen even if it rotates.
+		lib._modalRect = display.newRect( display.contentCenterX, display.contentCenterY, maxWidth, maxWidth )
 		lib._modalRect.isVisible = false
 		lib._modalRect.isHitTestable = true
-		-- prevent touches 
-		lib._modalRect.touch = function() return true; end
-		lib._modalRect.tap = function() return true; end
+		-- prevent touches
 		lib._modalRect:addEventListener( "touch", function() return true end )
 		lib._modalRect:addEventListener( "tap", function() return true end )
 		stage:insert( lib._modalRect )
@@ -1594,6 +1600,32 @@ local function purgeLruScene( event )	-- Lru = "least recently used"
 end
 
 Runtime:addEventListener( "memoryWarning", purgeLruScene )
+
+-----------------------------------------------------------------------------------------
+
+-- Set or remove a Runtime listener to update scene transition effects table if orientation changes.
+function lib.trackOrientation( track )
+	if _type( track ) ~= "boolean" then
+		print( "WARNING: bad argument to 'trackOrientation' (boolean expected, got ".._type( track ).."." )
+	else
+		-- Only add/remove the listener if it doesn't/does already exist.
+		if isTrackingOrientation and not track then
+			Runtime:removeEventListener( "orientation", onOrientationChange )
+		elseif not isTrackingOrientation and track then
+			Runtime:addEventListener( "orientation", onOrientationChange )
+		end
+		isTrackingOrientation = track
+	end
+end
+
+-----------------------------------------------------------------------------------------
+
+-- This function can be called manually to update the scene transition effects table.
+function lib.updateOrientation()
+    updateEffects()
+end
+
+-----------------------------------------------------------------------------------------
 
 -- TODO: This is deprecated.
 lib.printMemUsage = function()
