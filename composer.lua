@@ -602,7 +602,7 @@ end
 -- private
 -- saves the current scene and hides it
 lib._saveSceneAndHide = function( currentScene, newModule, noEffect )
-	if not currentScene then return; end
+	if not currentScene or currentScene.contentBounds == nil then return; end
     local screenshot
     if currentScene and currentScene.numChildren and currentScene.numChildren > 0 and not noEffect then
         --screenshot = display.capture( currentScene )
