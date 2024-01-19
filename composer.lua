@@ -73,485 +73,490 @@ local isGraphicsV1 = ( 1 == display.getDefault( "graphicsCompatibility" ) )
 
 -- TRANSITION EFFECTS
 
-local effectList = {
-	["fade"] =
-	{
-		["from"] =
+local effectList
+local function setTransitionEffectsList()
+    effectList = {
+		["fade"] =
 		{
-			alphaStart = 1.0,
-			alphaEnd = 0,
+			["from"] =
+			{
+				alphaStart = 1.0,
+				alphaEnd = 0,
+			},
+
+			["to"] =
+			{
+				alphaStart = 0,
+				alphaEnd = 1.0
+			}
 		},
 
-		["to"] =
+		["zoomOutIn"] =
 		{
-			alphaStart = 0,
-			alphaEnd = 1.0
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				yEnd = displayH*0.5,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001
+			},
+
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				yStart = displayH*0.5,
+				xEnd = 0,
+				yEnd = 0
+			},
+			hideOnOut = true
+		},
+
+		["zoomOutInFade"] =
+		{
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				yEnd = displayH*0.5,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				yStart = displayH*0.5,
+				xEnd = 0,
+				yEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+
+		["zoomInOut"] =
+		{
+			["from"] =
+			{
+				xEnd = -displayW*0.5,
+				yEnd = -displayH*0.5,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0
+			},
+
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = -displayW*0.5,
+				yStart = -displayH*0.5,
+				xEnd = 0,
+				yEnd = 0
+			},
+			hideOnOut = true
+		},
+
+		["zoomInOutFade"] =
+		{
+			["from"] =
+			{
+				xEnd = -displayW*0.5,
+				yEnd = -displayH*0.5,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = -displayW*0.5,
+				yStart = -displayH*0.5,
+				xEnd = 0,
+				yEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+
+		["flip"] =
+		{
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				xScaleEnd = 0.001
+			},
+
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				xEnd = 0
+			}
+		},
+
+		["flipFadeOutIn"] =
+		{
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				xScaleEnd = 0.001,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				xEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			}
+		},
+
+		["zoomOutInRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				yEnd = displayH*0.5,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001,
+				rotationStart = 0,
+				rotationEnd = -360
+			},
+
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				yStart = displayH*0.5,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0
+			},
+			hideOnOut = true
+		},
+
+		["zoomOutInFadeRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				yEnd = displayH*0.5,
+				xScaleEnd = 0.001,
+				yScaleEnd = 0.001,
+				rotationStart = 0,
+				rotationEnd = -360,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+
+			["to"] =
+			{
+				xScaleStart = 0.001,
+				yScaleStart = 0.001,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				yStart = displayH*0.5,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+
+		["zoomInOutRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				yEnd = displayH*0.5,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0,
+				rotationStart = 0,
+				rotationEnd = -360
+			},
+
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				yStart = displayH*0.5,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0
+			},
+			hideOnOut = true
+		},
+
+		["zoomInOutFadeRotate"] =
+		{
+			["from"] =
+			{
+				xEnd = displayW*0.5,
+				yEnd = displayH*0.5,
+				xScaleEnd = 2.0,
+				yScaleEnd = 2.0,
+				rotationStart = 0,
+				rotationEnd = -360,
+				alphaStart = 1.0,
+				alphaEnd = 0
+			},
+
+			["to"] =
+			{
+				xScaleStart = 2.0,
+				yScaleStart = 2.0,
+				xScaleEnd = 1.0,
+				yScaleEnd = 1.0,
+				xStart = displayW*0.5,
+				yStart = displayH*0.5,
+				xEnd = 0,
+				yEnd = 0,
+				rotationStart = -360,
+				rotationEnd = 0,
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			hideOnOut = true
+		},
+
+		["fromRight"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = displayW,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["fromLeft"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = -displayW,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["fromTop"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = 0,
+				yStart = -displayH,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["fromBottom"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = 0,
+				yStart = displayH,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["slideLeft"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = -displayW,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = displayW,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["slideRight"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = displayW,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = -displayW,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["slideDown"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = displayH,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = 0,
+				yStart = -displayH,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["slideUp"] =
+		{
+			["from"] =
+			{
+				xStart = 0,
+				yStart = 0,
+				xEnd = 0,
+				yEnd = -displayH,
+				transition = easing.outQuad
+			},
+
+			["to"] =
+			{
+				xStart = 0,
+				yStart = displayH,
+				xEnd = 0,
+				yEnd = 0,
+				transition = easing.outQuad
+			},
+			concurrent = true,
+			sceneAbove = true
+		},
+
+		["crossFade"] =
+		{
+			["from"] =
+			{
+				alphaStart = 1.0,
+				alphaEnd = 0,
+			},
+
+			["to"] =
+			{
+				alphaStart = 0,
+				alphaEnd = 1.0
+			},
+			concurrent = true
 		}
-	},
-	
-	["zoomOutIn"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomOutInFade"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOut"] =
-	{
-		["from"] =
-		{
-			xEnd = -displayW*0.5,
-			yEnd = -displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = -displayW*0.5,
-			yStart = -displayH*0.5,
-			xEnd = 0,
-			yEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOutFade"] =
-	{
-		["from"] =
-		{
-			xEnd = -displayW*0.5,
-			yEnd = -displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = -displayW*0.5,
-			yStart = -displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["flip"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			xScaleEnd = 0.001
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			xEnd = 0
-		}
-	},
-	
-	["flipFadeOutIn"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			xScaleEnd = 0.001,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			xEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		}
-	},
-	
-	["zoomOutInRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001,
-			rotationStart = 0,
-			rotationEnd = -360
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomOutInFadeRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 0.001,
-			yScaleEnd = 0.001,
-			rotationStart = 0,
-			rotationEnd = -360,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 0.001,
-			yScaleStart = 0.001,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOutRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0,
-			rotationStart = 0,
-			rotationEnd = -360
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0
-		},
-		hideOnOut = true
-	},
-	
-	["zoomInOutFadeRotate"] =
-	{
-		["from"] =
-		{
-			xEnd = displayW*0.5,
-			yEnd = displayH*0.5,
-			xScaleEnd = 2.0,
-			yScaleEnd = 2.0,
-			rotationStart = 0,
-			rotationEnd = -360,
-			alphaStart = 1.0,
-			alphaEnd = 0
-		},
-
-		["to"] =
-		{
-			xScaleStart = 2.0,
-			yScaleStart = 2.0,
-			xScaleEnd = 1.0,
-			yScaleEnd = 1.0,
-			xStart = displayW*0.5,
-			yStart = displayH*0.5,
-			xEnd = 0,
-			yEnd = 0,
-			rotationStart = -360,
-			rotationEnd = 0,
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		hideOnOut = true
-	},
-	
-	["fromRight"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["fromLeft"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = -displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["fromTop"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = -displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["fromBottom"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideLeft"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = -displayW,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideRight"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = displayW,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = -displayW,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideDown"] =
-	{ 
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = displayH,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = -displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["slideUp"] =
-	{
-		["from"] =
-		{
-			xStart = 0,
-			yStart = 0,
-			xEnd = 0,
-			yEnd = -displayH,
-			transition = easing.outQuad
-		},
-
-		["to"] =
-		{
-			xStart = 0,
-			yStart = displayH,
-			xEnd = 0,
-			yEnd = 0,
-			transition = easing.outQuad
-		},
-		concurrent = true,
-		sceneAbove = true
-	},
-	
-	["crossFade"] =
-	{
-		["from"] =
-		{
-			alphaStart = 1.0,
-			alphaEnd = 0,
-		},
-
-		["to"] =
-		{
-			alphaStart = 0,
-			alphaEnd = 1.0
-		},
-		concurrent = true
 	}
-}
-lib.effectList = effectList
+	lib.effectList = effectList
+end
+
+setTransitionEffectsList()
 
 -----------------------------------------------------------------------------------------
 
@@ -1599,6 +1604,14 @@ Runtime:addEventListener( "memoryWarning", purgeLruScene )
 lib.printMemUsage = function()
 	print("WARNING: composer.printMemUsage() has been removed.")
 end
+
+local function onResize(event)
+    -- Make sure transitions originate from the proper location if the device is rotated.
+    displayW = display.contentWidth
+    displayH = display.contentHeight
+    setTransitionEffectsList()
+end
+Runtime:addEventListener( "resize", onResize )
 
 lib.setVariable = function( key, value )
 	if nil ~= key and nil ~= value then
