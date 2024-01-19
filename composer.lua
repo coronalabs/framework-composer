@@ -1601,7 +1601,7 @@ lib.printMemUsage = function()
 end
 
 lib.setVariable = function( key, value )
-	if nil ~= key and nil ~= value then
+	if nil ~= key then
 		lib.variables[ key ] = value
 	end
 end
