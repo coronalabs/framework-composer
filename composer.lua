@@ -1369,7 +1369,7 @@ function lib.gotoScene( ... )
 			end
 			scene = lib.loadedScenes[newScene]
 			if _type(scene) == 'boolean' then
-				error( "Attempting to load scene from invalid scene module (" .. sceneName .. ".lua). Did you forget to return the scene object at the end of the scene module? (e.g. 'return scene')" )
+				error( "Attempting to load scene from invalid scene module (" .. _toString(newScene) .. ".lua). Did you forget to return the scene object at the end of the scene module? (e.g. 'return scene')" )
 			end
 		end		
 		
@@ -1458,7 +1458,7 @@ function lib.gotoScene( ... )
 		end
 		scene = lib.loadedScenes[newScene]
 		if _type(scene) == 'boolean' then
-			error( "Attempting to load scene from invalid scene module (" .. sceneName .. ".lua). Did you forget to return the scene object at the end of the scene module? (e.g. 'return scene')" )
+			error( "Attempting to load scene from invalid scene module (" .. _toString(newScene) .. ".lua). Did you forget to return the scene object at the end of the scene module? (e.g. 'return scene')" )
 		end
 		scene.view = scene.view or display.newGroup()
 		lib._currentScene = scene.view
