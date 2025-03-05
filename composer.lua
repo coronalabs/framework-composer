@@ -549,7 +549,43 @@ local effectList = {
 			alphaEnd = 1.0
 		},
 		concurrent = true
-	}
+	},
+
+	["tossLeft"] =
+	{
+		["from"] =
+		{
+			xStart = 0,
+			xEnd = -displayW * 3,
+			rotationStart = 0,
+			rotationEnd = -30,
+		},
+
+		["to"] =
+		{
+			xStart = 0,
+			xEnd = 0,
+		},
+		concurrent = true
+	},
+
+	["tossRight"] =
+	{
+		["from"] =
+		{
+			xStart = 0,
+			xEnd = displayW * 3,
+			rotationStart = 0,
+			rotationEnd = 30,
+		},
+
+		["to"] =
+		{
+			xStart = 0,
+			xEnd = 0,
+		},
+		concurrent = true
+	},
 }
 lib.effectList = effectList
 
